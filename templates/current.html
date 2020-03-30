@@ -1,0 +1,61 @@
+{% extends 'base/base.html' %}
+
+{% block script %} <script defer src="{{ url_for('static',filename = 'js/current.js')}}"></script> {% endblock %}
+
+
+  
+
+
+{% block navbar %}
+      <nav id="nav-menu-container">
+        <ul class="nav-menu pull-right">
+         <span style="color: white;">Username </span><li class="menu-active"></li><a href="#"><b>Logout</b></a></li>
+        </ul>
+      </nav>
+{% endblock %}
+
+      {% block body %} 
+
+      <div class="container-fluid" style="margin-top: 100px;border-color:#2dc997; border-radius: 10px; margin-bottom: 30px; border-style: solid; max-width: 90%; min-width: 300px;">
+      <form action="http://localhost:5000/upload" method="POST" enctype="multipart/form-data">
+        
+          <div class="row">
+            
+                <label class="control-label"></label>
+                
+                      <div style="margin: 20px;"><b>Upload File</b></div>
+                    </div>
+                    <div class="box-body" id = "review" style="margin: 30px;">
+                
+                    <i class="glyphicon glyphicon-download-alt"></i>
+                    <p>Choose  Image files or drag it here(max Two Images).</p>
+                  </div>
+                  <div class="row">
+                  <div style="margin: 30px;">
+                  <input type="file" id ="fileupload" name="file" accept=".jpg,.jpeg,.png" class="dropzone" multiple required>
+                  </div>
+              <div id="dvPreview"></div>
+            
+            </div>
+          <div class="row">
+            
+            <button type="button" id = "up1" class="btn btn-primary pull-left"style="max-width: 300px; margin: 10px;background-color:#2dc997;" onclick="video()"href="#video" >Upload Input Video</button>
+
+            <button type="button" id = "up2"  class="btn btn-primary pull-left" style="max-width: 300px; margin: 10px;background-color:#2dc997;" onclick="third()" href="#third">Upload Info About Video Source
+          </button>
+            </div>
+            <div id = "video">
+            </div>
+            <div id = "third">
+            </div>
+      
+      </form>
+    </div>
+  
+
+
+    
+    <!---->
+    
+    {% endblock %}
+

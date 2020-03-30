@@ -59,6 +59,13 @@ function resetthird() {
 
 
 
+function processing()
+{
+  document.getElementById("current").style.display = 'none'
+  document.getElementById("loading").style.display = 'block'
+
+}
+
 
 
 
@@ -77,7 +84,7 @@ htm = `
 					<div class="col-xs-12 col-sm-6 col-md-9">
 					<input type="file" class="input-file" name="videos" accept = ".mp4" multiple required/>
 					</div>
-          <button type="submit" class="btn btn-primary pull-left" style="max-width: 200px;margin-left: 10px; background-color:#2dc997; margin-bottom: 10px;"> Upload All</button>
+          <input type="submit" name="action" id ="videobutton" value="Upload" class="btn btn-primary pull-left" style="max-width: 200px;margin-left: 8px;margin-top: 10px; background-color:#2dc997; margin-bottom: 10px;" onclick="processing();" />
           <button type="button" class="btn btn-danger pull-left" style="max-width: 200px;margin-left: 10px; margin-bottom: 10px;" onclick="resetvideo()"> Reset The Field
           </button><br><br><br>
           </div>
@@ -152,7 +159,7 @@ htm = `
 </div><br><br>
 
 <div class ="row col-md-4 col-xs-12 col-sm-6 col-md-9"style="margin-left:5px;">
-<button type="button" class="btn btn-primary pull-left" style="max-width: 200px;margin-left: 10px; background-color:#2dc997; margin-bottom: 10px;"> Request for Video</button>
+<input type="submit" name="action" value = "Request_Video" class="btn btn-primary pull-left" style="max-width: 200px;margin-left: 10px; background-color:#2dc997; margin-bottom: 10px;"/>
 <button type="button" class="btn btn-danger pull-left" style="max-width: 200px;margin-left: 10px; margin-bottom: 10px;" onclick="resetthird()"> Reset The Field
           </button>
         </div>

@@ -16,7 +16,7 @@
 
       {% block body %} 
 
-      <div class="container-fluid" style="margin-top: 100px;border-color:#2dc997; border-radius: 10px; margin-bottom: 30px; border-style: solid; max-width: 90%; min-width: 300px;">
+      <div class="container-fluid" id="current" style="margin-top: 100px;border-color:#2dc997; border-radius: 10px; margin-bottom: 30px; border-style: solid; max-width: 90%; min-width: 300px;">
       <form action="http://localhost:5000/upload" method="POST" enctype="multipart/form-data">
         
           <div class="row">
@@ -51,6 +51,10 @@
       
       </form>
     </div>
+
+    <div id="loading" style="display:none">
+      <h3>Processing the model please wait...</h3>
+  </div>
   
 
 

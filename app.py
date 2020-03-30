@@ -63,21 +63,6 @@ def encode_faces(img, shapes):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
 @app.route('/current')
 def current():
     return render_template('current.html')
@@ -85,9 +70,7 @@ def current():
 
 
 
-@app.route('/upload', methods=['POST','GET'])
-
-
+@app.route('/upload', methods=['POST'])
 def train():
     filelist = [f for f in os.listdir('uploads/')]
     for f in filelist:
@@ -130,65 +113,65 @@ def train():
             _ ,img_shapes, _ = find_faces(image,myimages[i])
             descs[i] = encode_faces(image, img_shapes)[0]
         np.save('train/descs.npy', descs)
+        if request.form['action'] == "Upload":
+            descs = np.load('train/descs.npy',allow_pickle=True)[()]
+            filelist2 = [f for f in os.listdir('video/')]
+            for f in filelist2:
+                os.remove(os.path.join('video/', f))
 
-        descs = np.load('train/descs.npy',allow_pickle=True)[()]
-        filelist2 = [f for f in os.listdir('video/')]
-        for f in filelist2:
-            os.remove(os.path.join('video/', f))
-
-        videos = request.files.getlist("videos")
-        for f in videos:
-            if len(videos) == 1 :
-                filename = secure_filename(f.filename)
-                f.save(os.path.join(app.config['UPLOAD_VIDEO'], filename))
-                video_path = 'video/'+ f.filename
-                print(video_path)
-                cap = cv2.VideoCapture(video_path)
-                if not cap.isOpened():
-                    exit()
+            videos = request.files.getlist("videos")
+            for f in videos:
+                if len(videos) == 1 :
+                    filename = secure_filename(f.filename)
+                    f.save(os.path.join(app.config['UPLOAD_VIDEO'], filename))
+                    video_path = 'video/'+ f.filename
+                    print(video_path)
+                    cap = cv2.VideoCapture(video_path)
+                    if not cap.isOpened():
+                        exit()
         
-                _, img_bgr = cap.read()
-                padding_size = 0
-                resized_width = 1920
-                video_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1]))
-                output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
+                    _, img_bgr = cap.read()
+                    padding_size = 0
+                    resized_width = 1920
+                    video_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1]))
+                    output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
 
-                fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-                writer = cv2.VideoWriter('%s_output.mp4' % (video_path.split('.')[0]), fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
+                    fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+                    writer = cv2.VideoWriter('%s_output.mp4' % (video_path.split('.')[0]), fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
 
-                while True:
-                    ret, img_bgr = cap.read()
-                    if not ret:
-                        break
+                    while True:
+                        ret, img_bgr = cap.read()
+                        if not ret:
+                            break
 
-                    img_bgr = cv2.resize(img_bgr, video_size)
-                    img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+                        img_bgr = cv2.resize(img_bgr, video_size)
+                        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+                        dets = detector(img_bgr, 1)
 
-                    # img_bgr = cv2.copyMakeBorder(img_bgr, top=padding_size, bottom=padding_size, left=0, right=0, borderType=cv2.BORDER_CONSTANT, value=(0,0,0))
-  
-                    dets = detector(img_bgr, 1)
+                        for k, d in enumerate(dets):
+                            shape = sp(img_rgb, d)
+                            face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
 
-                    for k, d in enumerate(dets):
-                        shape = sp(img_rgb, d)
-                        face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
+                            last_found = {'name': 'unknown', 'dist': 0.45, 'color': (0,0,255)}
 
-                        last_found = {'name': 'unknown', 'dist': 0.45, 'color': (0,0,255)}
+                            for name, saved_desc in descs.items():
+                                dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
 
-                        for name, saved_desc in descs.items():
-                            dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
+                                if dist < last_found['dist']:
+                                    last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255)}
 
-                            if dist < last_found['dist']:
-                                last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255)}
+                            cv2.rectangle(img_bgr, pt1=(d.left(), d.top()), pt2=(d.right(), d.bottom()), color=last_found['color'], thickness=2)
+                            cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
 
-                        cv2.rectangle(img_bgr, pt1=(d.left(), d.top()), pt2=(d.right(), d.bottom()), color=last_found['color'], thickness=2)
-                        cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
-
-                    writer.write(img_bgr)
+                        writer.write(img_bgr)
                     
-                break
-                cap.release()
-                writer.release()
+                    break
+                    cap.release()
+                    writer.release()
 
+
+        elif request.form['action'] == 'Request_Video':
+            return render_template('current.html')
 
 
 
@@ -213,9 +196,6 @@ def train():
 
 
         
-
-
-
 
 
 

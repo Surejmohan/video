@@ -3,6 +3,14 @@
 {% block script %} 
 <script defer src="{{ url_for('static',filename = 'js/current.js')}}"></script> 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+
+
 <script>
 var textWrapper = document.querySelector('.ml2');
 textWrapper.innerHTML = textWrapper.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
@@ -42,6 +50,12 @@ easing: "easeOutExpo",
 delay: 1000
 });
 
+
+
+
+
+
+
 function processing()
 {
   if(document.getElementById("fileupload").checkValidity() && document.getElementById("videobutton").checkValidity()){
@@ -54,12 +68,20 @@ function processing()
 
 function processingthird()
 {
-  if(document.getElementById("fileupload").checkValidity() && document.getElementById("secondList").checkValidity()){
+  if(document.getElementById("fileupload").checkValidity() && document.getElementById("secondList").checkValidity() 
+  && document.getElementById("date").checkValidity() && document.getElementById("starttime").checkValidity()
+  && document.getElementById("endtime").checkValidity()){
   document.getElementById("curent").style.display = 'none'
   document.getElementById("loading").style.display = 'block'
   document.getElementById("videocheck").submit()
   }
 
+}
+
+function hidepreview()
+{
+
+  $("#dvPreview").hide();
 }
 
 </script>
@@ -97,16 +119,20 @@ function processingthird()
                   </div>
                   <div class="row">
                   <div style="margin: 30px;">
-                  <input type="file" id ="fileupload" name="file" accept=".jpg,.jpeg,.png" class="dropzone" multiple required>
+                    <label class="custom-file">
+                      <input type="file" class="custom-file-input" id ="fileupload" name="file" accept=".jpg,.jpeg,.png" class="dropzone" multiple required>
+                      <span class="custom-file-control"></span>
+                    </label>
+                  
                   </div>
               <div id="dvPreview"></div>
+              <button type="reset" class="btn btn-danger pull-left" style="max-width: 200px;max-height: 40px; margin-left: 25px; margin-bottom: 10px;" onclick="hidepreview();"> Reset The Field
+            </button></div>
+          <div class="row col-md-4 col-xs-12 col-sm-6 col-md-9">
             
-            </div>
-          <div class="row">
-            
-            <button type="button" id = "up1" class="btn btn-primary pull-left"style="max-width: 300px; margin: 10px;background-color:#2dc997;" onclick="video()"href="#video" >Upload Input Video</button>
+            <button type="button" id = "up1" class="btn btn-primary pull-left"style="max-width: 200px; margin: 10px;background-color:#2dc997;" onclick="video()"href="#video" >Upload Input Video</button>
 
-            <button type="button" id = "up2"  class="btn btn-primary pull-left" style="max-width: 300px; margin: 10px;background-color:#2dc997;" onclick="third()" href="#third">Upload Info About Video Source
+            <button type="button" id = "up2"  class="btn btn-primary pull-left" style="max-width: 200px; margin: 10px;background-color:#2dc997;" onclick="third()" href="#third">Upload Info About Video
           </button>
             </div>
             <div id = "video">

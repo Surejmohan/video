@@ -112,22 +112,27 @@ def train():
             image = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
             _ ,img_shapes, _ = find_faces(image,myimages[i])
             descs[i] = encode_faces(image, img_shapes)[0]
-        np.save('train/descs.npy', descs)
-        if request.form['action'] == "Upload":
+        if request.form['action'] == 'Request_Video':
+            np.save('third/username.npy', descs)
+
+           
+        elif request.form['action'] == "Upload":
+            np.save('train/descs.npy', descs)
             descs = np.load('train/descs.npy',allow_pickle=True)[()]
             filelist2 = [f for f in os.listdir('video/')]
             for f in filelist2:
                 os.remove(os.path.join('video/', f))
 
             videos = request.files.getlist("videos")
-            for f in videos:
-                if len(videos) == 1 :
+            f = videos[0]
+            if len(videos) == 1 :
                     filename = secure_filename(f.filename)
                     f.save(os.path.join(app.config['UPLOAD_VIDEO'], filename))
                     video_path = 'video/'+ f.filename
                     print(video_path)
                     cap = cv2.VideoCapture(video_path)
                     if not cap.isOpened():
+                        print("Video cannot Open")
                         exit()
         
                     _, img_bgr = cap.read()
@@ -137,9 +142,11 @@ def train():
                     output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
 
                     fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-                    writer = cv2.VideoWriter('%s_output.mp4' % (video_path.split('.')[0]), fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
-
+                    writer = cv2.VideoWriter('result/output.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
+                    m=-1
+                    i=1
                     while True:
+                        
                         ret, img_bgr = cap.read()
                         if not ret:
                             break
@@ -159,16 +166,23 @@ def train():
 
                                 if dist < last_found['dist']:
                                     last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255)}
-
+                                    if m == -1:
+                                        s = i
+                                        m=0
+                                    
                             cv2.rectangle(img_bgr, pt1=(d.left(), d.top()), pt2=(d.right(), d.bottom()), color=last_found['color'], thickness=2)
                             cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
-
+                        i=i+1
                         writer.write(img_bgr)
                     
-                    break
+                
                     cap.release()
                     writer.release()
+                    print(s/24)
 
+            else:
+                print("Only one video can upload")
+                exit()
 
         elif request.form['action'] == 'Request_Video':
             return render_template('current.html')

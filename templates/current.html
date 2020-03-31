@@ -1,9 +1,74 @@
 {% extends 'base/base.html' %}
 
-{% block script %} <script defer src="{{ url_for('static',filename = 'js/current.js')}}"></script> {% endblock %}
+{% block script %} 
+<script defer src="{{ url_for('static',filename = 'js/current.js')}}"></script> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+<script>
+var textWrapper = document.querySelector('.ml2');
+textWrapper.innerHTML = textWrapper.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
 
+anime.timeline({loop: true})
+.add({
+targets: '.ml2 .letter',
+scale: [4,1],
+opacity: [0,1],
+translateZ: 0,
+easing: "easeOutExpo",
+duration: 950,
+delay: (el, i) => 70*i
+}).add({
+targets: '.ml2',
+opacity: 0,
+duration: 1000,
+easing: "easeOutExpo",
+delay: 1000
+});var textWrapper = document.querySelector('.ml2');
+textWrapper.innerHTML = textWrapper.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
 
-  
+anime.timeline({loop: true})
+.add({
+targets: '.ml2 .letter',
+scale: [4,1],
+opacity: [0,1],
+translateZ: 0,
+easing: "easeOutExpo",
+duration: 950,
+delay: (el, i) => 70*i
+}).add({
+targets: '.ml2',
+opacity: 0,
+duration: 1000,
+easing: "easeOutExpo",
+delay: 1000
+});
+
+function processing()
+{
+  if(document.getElementById("fileupload").checkValidity() && document.getElementById("videobutton").checkValidity()){
+  document.getElementById("curent").style.display = 'none'
+  document.getElementById("loading").style.display = 'block'
+  document.getElementById("videocheck").submit()
+  }
+
+}
+
+function processingthird()
+{
+  if(document.getElementById("fileupload").checkValidity() && document.getElementById("secondList").checkValidity()){
+  document.getElementById("curent").style.display = 'none'
+  document.getElementById("loading").style.display = 'block'
+  document.getElementById("videocheck").submit()
+  }
+
+}
+
+</script>
+
+{% endblock %}
+
+{% block style %} 
+<link href="{{ url_for('static',filename = 'css/current.css')}}" rel="stylesheet">
+{% endblock %}
 
 
 {% block navbar %}
@@ -16,8 +81,8 @@
 
       {% block body %} 
 
-      <div class="container-fluid" id="current" style="margin-top: 100px;border-color:#2dc997; border-radius: 10px; margin-bottom: 30px; border-style: solid; max-width: 90%; min-width: 300px;">
-      <form action="http://localhost:5000/upload" method="POST" enctype="multipart/form-data">
+      <div class="container-fluid" id="curent" style="margin-top: 100px;border-color:#2dc997; border-radius: 10px; margin-bottom: 30px; border-style: solid; max-width: 90%; min-width: 300px;">
+      <form action="http://localhost:5000/upload" method="POST" enctype="multipart/form-data" id="videocheck" >
         
           <div class="row">
             
@@ -51,9 +116,21 @@
       
       </form>
     </div>
+    <div id = "loading" style="display:none;margin-top: 10%;margin-bottom:16%;">
 
-    <div id="loading" style="display:none">
-      <h3>Processing the model please wait...</h3>
+    <h1 class="ml2"> <i> Processing...Please wait...</i></h1>
+
+    <div class="loader">
+      <div class="holder">
+          <div class="box"></div>
+      </div>
+      <div class="holder">
+          <div class="box"></div>
+      </div>
+      <div class="holder">
+          <div class="box"></div>
+      </div>
+  </div>
   </div>
   
 

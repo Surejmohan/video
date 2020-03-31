@@ -59,12 +59,7 @@ function resetthird() {
 
 
 
-function processing()
-{
-  document.getElementById("current").style.display = 'none'
-  document.getElementById("loading").style.display = 'block'
 
-}
 
 
 
@@ -82,9 +77,9 @@ htm = `
 <div class="form-group" style = "margin-bottom: 10px;"><br>
 <div style="margin: 20px;"><b>Upload Video</b></div>
 					<div class="col-xs-12 col-sm-6 col-md-9">
-					<input type="file" class="input-file" name="videos" accept = ".mp4" multiple required/>
+					<input type="file" id ="videobutton" class="input-file" name="videos" accept = ".mp4" multiple required/>
 					</div>
-          <input type="submit" name="action" id ="videobutton" value="Upload" class="btn btn-primary pull-left" style="max-width: 200px;margin-left: 8px;margin-top: 10px; background-color:#2dc997; margin-bottom: 10px;" onclick="processing();" />
+          <input type="submit" name="action" id ="video" value="Upload" class="btn btn-primary pull-left" style="max-width: 200px;margin-left: 8px;margin-top: 10px; background-color:#2dc997; margin-bottom: 10px;" onclick="processing();" />
           <button type="button" class="btn btn-danger pull-left" style="max-width: 200px;margin-left: 10px; margin-bottom: 10px;" onclick="resetvideo()"> Reset The Field
           </button><br><br><br>
           </div>
@@ -159,7 +154,7 @@ htm = `
 </div><br><br>
 
 <div class ="row col-md-4 col-xs-12 col-sm-6 col-md-9"style="margin-left:5px;">
-<input type="submit" name="action" value = "Request_Video" class="btn btn-primary pull-left" style="max-width: 200px;margin-left: 10px; background-color:#2dc997; margin-bottom: 10px;"/>
+<input type="submit" name="action" value = "Request_Video" class="btn btn-primary pull-left" style="max-width: 200px;margin-left: 10px; background-color:#2dc997; margin-bottom: 10px;" onclick="processingthird();" />
 <button type="button" class="btn btn-danger pull-left" style="max-width: 200px;margin-left: 10px; margin-bottom: 10px;" onclick="resetthird()"> Reset The Field
           </button>
         </div>
@@ -188,7 +183,5 @@ $("#up2").click(function () {
 	$("#up1").hide();
   $("#video").hide();
   $("#third").show();
-
-	
-
 });
+

@@ -3,15 +3,17 @@ from werkzeug.utils import secure_filename
 import dlib,cv2
 import numpy as np
 import os
+from flask.helpers import send_from_directory
 
 
 UPLOAD_FOLDER = './uploads'
 UPLOAD_VIDEO = './video'
-
+DOWNLOAD = './result'
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['UPLOAD_VIDEO'] = UPLOAD_VIDEO
+app.config['DOWNLOAD'] = DOWNLOAD
 
 detector = dlib.get_frontal_face_detector()
 sp = dlib.shape_predictor('models/shape_predictor_68_face_landmarks.dat')
@@ -61,11 +63,10 @@ def encode_faces(img, shapes):
 
 
 
-
-
 @app.route('/current')
 def current():
     return render_template('current.html')
+
 
 
 
@@ -115,6 +116,11 @@ def train():
         if request.form['action'] == 'Request_Video':
             np.save('third/username.npy', descs)
 
+            return render_template('current.html')
+
+
+
+
            
         elif request.form['action'] == "Upload":
             np.save('train/descs.npy', descs)
@@ -145,6 +151,7 @@ def train():
                     writer = cv2.VideoWriter('result/output.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
                     m=-1
                     i=1
+                    s=0
                     while True:
                         
                         ret, img_bgr = cap.read()
@@ -178,13 +185,76 @@ def train():
                 
                     cap.release()
                     writer.release()
-                    print(s/24)
+                    print(convert(s/24)) 
 
             else:
                 print("Only one video can upload")
                 exit()
 
-        elif request.form['action'] == 'Request_Video':
+
+
+
+
+
+        elif request.form['action'] == "ON":
+            np.save('train/descs.npy', descs)
+            descs = np.load('train/descs.npy',allow_pickle=True)[()]
+            
+            cap = cv2.VideoCapture(0)
+            if not cap.isOpened():
+                print("Camera is not working")
+                exit()
+        
+            _, img_bgr = cap.read()
+            padding_size = 0
+            resized_width = 1360
+            video_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1]))
+            output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
+
+            fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+            writer = cv2.VideoWriter('result/output.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
+            m=-1
+            i=1
+            s=0
+            while True:
+                        
+                ret, img_bgr = cap.read()
+                if not ret:
+                    break
+
+                img_bgr = cv2.resize(img_bgr, video_size)
+                img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+                dets = detector(img_bgr, 1)
+
+                for k, d in enumerate(dets):
+                    shape = sp(img_rgb, d)
+                    face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
+
+                    last_found = {'name': 'unknown', 'dist': 0.45, 'color': (0,0,255)}
+
+                    for name, saved_desc in descs.items():
+                        dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
+
+                        if dist < last_found['dist']:
+                            last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255)}
+                            if m == -1:
+                                s = i
+                                m=0
+                                    
+                    cv2.rectangle(img_bgr, pt1=(d.left(), d.top()), pt2=(d.right(), d.bottom()), color=last_found['color'], thickness=2)
+                    cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
+                i=i+1
+                writer.write(img_bgr)
+                cv2.imshow('img', img_bgr)
+                if cv2.waitKey(1) == ord('q'):
+                    break
+                    
+                
+            cap.release()
+            writer.release()
+            print(convert(s/24)) 
+
+
             return render_template('current.html')
 
 
@@ -199,11 +269,26 @@ def train():
 
         return render_template('current.html')
 
-    
 
 
+def convert(seconds): 
+    seconds = seconds % (24 * 3600) 
+    hour = seconds // 3600
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+    return "%d:%02d:%02d" % (hour, minutes, seconds) 
 
 
+@app.route('/master')
+def master():
+    return '<a class="label label-primary" href="/result/output.mp4" download target="_blank"  style="margin-right: 5px;">Download video </a>'
+
+
+@app.route('/result/<path:filename>', methods=['GET', 'POST'])
+def download(filename):
+
+    return send_from_directory(directory='result', filename=filename)
 
 
 

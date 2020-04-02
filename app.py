@@ -3,14 +3,17 @@ from werkzeug.utils import secure_filename
 import dlib,cv2
 import numpy as np
 import os
-from flask.helpers import send_from_directory
+from flask.helpers import flash, get_flashed_messages, send_from_directory
 
 
 UPLOAD_FOLDER = './uploads'
 UPLOAD_VIDEO = './video'
 DOWNLOAD = './result'
+ALLOWED_FILEEXTENSIONS = set(['jpg','jpeg'])
+ALLOWED_VIDEOEXTENSIONS = set(['mp4'])
 
 app = Flask(__name__)
+app.secret_key = "super secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['UPLOAD_VIDEO'] = UPLOAD_VIDEO
 app.config['DOWNLOAD'] = DOWNLOAD
@@ -28,8 +31,7 @@ def find_faces(image,name):
     if len(dets) == 0:
         return np.empty(0), np.empty(0), np.empty(0)
     if len(dets) > 1:
-         print("Please change image: " + name + " - it has " + str(len(dets)) + " faces; it can only have one")
-         exit()
+        print("Please change image: " + name + " - it has " + str(len(dets)) + " faces; it can only have one")
 
     
     rects, shapes = [], []
@@ -40,16 +42,13 @@ def find_faces(image,name):
 
         shape = sp(image, d)
         
-        # convert dlib shape to numpy array
+       
         for i in range(0, 68):
             shapes_np[k][i] = (shape.part(i).x, shape.part(i).y)
 
         shapes.append(shape)
         
     return rects, shapes, shapes_np
-
-
-
 
 
 def encode_faces(img, shapes):
@@ -61,6 +60,26 @@ def encode_faces(img, shapes):
     return np.array(face_descriptors)
 
 
+def convert(seconds): 
+    seconds = seconds % (24 * 3600) 
+    hour = seconds // 3600
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+    return "%d:%02d:%02d" % (hour, minutes, seconds) 
+
+
+def allowed_file1(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_FILEEXTENSIONS
+
+def allowed_file2(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_VIDEOEXTENSIONS
+
+
+
+
 
 
 @app.route('/current')
@@ -68,6 +87,9 @@ def current():
     return render_template('current.html')
 
 
+@app.route('/master')
+def current1():
+    return render_template('output.html')
 
 
 
@@ -82,8 +104,13 @@ def train():
         
         uploaded_files = request.files.getlist("file")
         for f in uploaded_files:
-            filename = secure_filename(f.filename)
-            f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            if f and allowed_file1(f.filename):
+                filename = secure_filename(f.filename)
+                f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            else:
+                flash("Invalid Input File Format; only jpeg or jpg supported")
+                print("Invalid Input File Format; only jpeg or jpg supported")
+                return redirect(url_for('current'))
         
         myimages = []
         dirfiles = os.listdir('uploads/')
@@ -95,11 +122,12 @@ def train():
                 myimages.append(files)
         no_of_images = len(myimages)
         if no_of_images > 2:
+            flash('Maximum Number of Images is 2')
             print("Maximum Number of Images is 2 ")
             filelist = [f for f in os.listdir('uploads/')]
             for f in filelist:
                 os.remove(os.path.join('uploads/', f))
-            exit()
+            return redirect(url_for('current'))
 
 
         names = [x[:-4] for x in myimages]
@@ -111,12 +139,17 @@ def train():
         for i in range(0,no_of_images):    
             img_bgr = cv2.imread(paths[i])
             image = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+            if len(detector(image, 1)) > 1 :
+                flash('Please change image: ' + myimages[i] + ' - it has ' + str(len(detector(image, 1))))
+                print("Please change image: " + myimages[i] + " - it has " + str(len(detector(image, 1))) + " faces; it can only have one")
+                return redirect(url_for('current'))
+
             _ ,img_shapes, _ = find_faces(image,myimages[i])
             descs[i] = encode_faces(image, img_shapes)[0]
         if request.form['action'] == 'Request_Video':
             np.save('third/username.npy', descs)
 
-            return render_template('current.html')
+            return render_template('output.html')
 
 
 
@@ -132,14 +165,19 @@ def train():
             videos = request.files.getlist("videos")
             f = videos[0]
             if len(videos) == 1 :
+                    if not allowed_file2(f.filename):
+                        flash('Invalid Video Format ;Only Mp4 Supported')
+                        print("Invalid Video Format ;Only Mp4 Supported")
+                        return redirect(url_for('current'))
                     filename = secure_filename(f.filename)
                     f.save(os.path.join(app.config['UPLOAD_VIDEO'], filename))
                     video_path = 'video/'+ f.filename
                     print(video_path)
                     cap = cv2.VideoCapture(video_path)
                     if not cap.isOpened():
+                        flash('Video cannot Open')
                         print("Video cannot Open")
-                        exit()
+                        return redirect(url_for('current'))
         
                     _, img_bgr = cap.read()
                     padding_size = 0
@@ -157,7 +195,7 @@ def train():
                         ret, img_bgr = cap.read()
                         if not ret:
                             break
-
+    
                         img_bgr = cv2.resize(img_bgr, video_size)
                         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
                         dets = detector(img_bgr, 1)
@@ -185,11 +223,15 @@ def train():
                 
                     cap.release()
                     writer.release()
+                    time = convert(s/24)
                     print(convert(s/24)) 
+                    success = "You have successfully Processed the Video"
+                    return render_template('output.html',success = success, time = time)
 
             else:
+                flash('Only one video can upload')
                 print("Only one video can upload")
-                exit()
+                return redirect(url_for('current'))
 
 
 
@@ -202,8 +244,9 @@ def train():
             
             cap = cv2.VideoCapture(0)
             if not cap.isOpened():
+                flash('Camera is not working')
                 print("Camera is not working")
-                exit()
+                return redirect(url_for('current'))
         
             _, img_bgr = cap.read()
             padding_size = 0
@@ -252,37 +295,20 @@ def train():
                 
             cap.release()
             writer.release()
+            time = convert(s/24)
             print(convert(s/24)) 
-
-
-            return render_template('current.html')
-
-
-
-
-
+            success = "You have successfully Processed the Video"
+            return render_template('output.html',success = success, time = time)
 
         
-        
+    else:
+        print("Error")
+        exit()
 
 
 
-        return render_template('current.html')
 
 
-
-def convert(seconds): 
-    seconds = seconds % (24 * 3600) 
-    hour = seconds // 3600
-    seconds %= 3600
-    minutes = seconds // 60
-    seconds %= 60
-    return "%d:%02d:%02d" % (hour, minutes, seconds) 
-
-
-@app.route('/master')
-def master():
-    return '<a class="label label-primary" href="/result/output.mp4" download target="_blank"  style="margin-right: 5px;">Download video </a>'
 
 
 @app.route('/result/<path:filename>', methods=['GET', 'POST'])

@@ -92,7 +92,7 @@ descs = np.load('img/descs.npy',allow_pickle=True)[()]
 
 
 
-video_path = 'img/video1.mp4'
+video_path = 0
 cap = cv2.VideoCapture(video_path)
 
 if not cap.isOpened():

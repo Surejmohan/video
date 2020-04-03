@@ -288,9 +288,9 @@ def train():
                     cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
                 i=i+1
                 writer.write(img_bgr)
-                cv2.imshow('img', img_bgr)
-                if cv2.waitKey(1) == ord('q'):
-                    break
+                #cv2.imshow('img', img_bgr)
+                #if cv2.waitKey(1) == ord('q'):
+                    #break
                     
                 
             cap.release()

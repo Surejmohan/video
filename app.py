@@ -1,11 +1,18 @@
+#import libraries
+
 from flask import Flask, render_template,request,redirect,url_for
 from werkzeug.utils import secure_filename
 import dlib,cv2
 import numpy as np
 import os
 from flask.helpers import flash, get_flashed_messages, send_from_directory
+from flask import url_for,session,logging,request
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.oracle import BLOB,DATE
+#end
 
 
+#intialise direectories and keys
 UPLOAD_FOLDER = './uploads'
 UPLOAD_VIDEO = './video'
 DOWNLOAD = './result'
@@ -13,17 +20,30 @@ ALLOWED_FILEEXTENSIONS = set(['jpg','jpeg'])
 ALLOWED_VIDEOEXTENSIONS = set(['mp4'])
 
 app = Flask(__name__)
-app.secret_key = "super secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['UPLOAD_VIDEO'] = UPLOAD_VIDEO
 app.config['DOWNLOAD'] = DOWNLOAD
+app.config['SECRET_KEY'] = 'secret'
+#end
 
+#import ML models 
 detector = dlib.get_frontal_face_detector()
 sp = dlib.shape_predictor('models/shape_predictor_68_face_landmarks.dat')
 facerec = dlib.face_recognition_model_v1('models/dlib_face_recognition_resnet_model_v1.dat')
+#end
 
 
 
+#database models
+
+#end    
+
+
+
+
+
+
+# findface function
 def find_faces(image,name):
 
     dets = detector(image, 1)
@@ -49,8 +69,10 @@ def find_faces(image,name):
         shapes.append(shape)
         
     return rects, shapes, shapes_np
+#end
 
 
+# encode face function
 def encode_faces(img, shapes):
     face_descriptors = []
     for shape in shapes:
@@ -59,7 +81,7 @@ def encode_faces(img, shapes):
 
     return np.array(face_descriptors)
 
-
+# convert to time format
 def convert(seconds): 
     seconds = seconds % (24 * 3600) 
     hour = seconds // 3600
@@ -67,19 +89,24 @@ def convert(seconds):
     minutes = seconds // 60
     seconds %= 60
     return "%d:%02d:%02d" % (hour, minutes, seconds) 
+#end
 
-
+#allowed files
 def allowed_file1(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_FILEEXTENSIONS
+#end
 
+#allowed videos
 def allowed_file2(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_VIDEOEXTENSIONS
+#end
 
 
 
 
+#contollers
 
 
 @app.route('/current')
@@ -90,6 +117,11 @@ def current():
 @app.route('/master')
 def current1():
     return render_template('output.html')
+
+
+@app.route('/result/<path:filename>', methods=['GET', 'POST'])
+def download(filename):
+    return send_from_directory(directory='result', filename=filename)
 
 
 
@@ -148,6 +180,10 @@ def train():
             descs[i] = encode_faces(image, img_shapes)[0]
         if request.form['action'] == 'Request_Video':
             np.save('third/username.npy', descs)
+
+
+
+
 
             return render_template('output.html')
 
@@ -307,22 +343,9 @@ def train():
 
 
 
-
-
-
-
-@app.route('/result/<path:filename>', methods=['GET', 'POST'])
-def download(filename):
-
-    return send_from_directory(directory='result', filename=filename)
-
-
-
-
-
-        
-
+#end
 
 
 if(__name__ == "__main__"):
+    db.create_all()
     app.run(debug=True)

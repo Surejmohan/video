@@ -7,8 +7,8 @@ import numpy as np
 import os
 from flask.helpers import flash, get_flashed_messages, send_from_directory
 from flask import url_for,session,logging,request
+from _datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.dialects.oracle import BLOB,DATE
 #end
 
 
@@ -23,6 +23,8 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['UPLOAD_VIDEO'] = UPLOAD_VIDEO
 app.config['DOWNLOAD'] = DOWNLOAD
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///main.db'
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['SECRET_KEY'] = 'secret'
 #end
 
@@ -32,9 +34,9 @@ sp = dlib.shape_predictor('models/shape_predictor_68_face_landmarks.dat')
 facerec = dlib.face_recognition_model_v1('models/dlib_face_recognition_resnet_model_v1.dat')
 #end
 
-
-
 #database models
+db = SQLAlchemy(app)
+
 
 #end    
 
@@ -180,6 +182,20 @@ def train():
             descs[i] = encode_faces(image, img_shapes)[0]
         if request.form['action'] == 'Request_Video':
             np.save('third/username.npy', descs)
+
+            name = request.form['firstList']
+            dept = request.form['secondList']
+            date = request.form.get('date')
+            start_time = request.form.get('starttime')
+            end_time = request.form.get('endtime')
+
+            print(name)
+            print(dept)
+            print(date)
+            print(start_time)
+            print(end_time)
+
+            send = Other()
 
 
 
@@ -347,5 +363,5 @@ def train():
 
 
 if(__name__ == "__main__"):
-    db.create_all()
+    #db.create_all()
     app.run(debug=True)

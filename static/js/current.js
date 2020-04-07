@@ -126,29 +126,29 @@ var list1 = document.getElementById('firstList').value;
 var list2 = document.getElementById("secondList");
 
 
-if (list1 =='1')
+if (list1 =='Railways')
 {
 
 list2.options.length=0;
 list2.options[0] = new Option('--Select--', '');
-list2.options[1] = new Option('Ernakulam Junction South (ERS)', '1');
-list2.options[2] = new Option('Thiruvananthapuram Central Station (TVC)', '2');
-list2.options[3] = new Option('Ernakulam Town Station (ERN)', '3');
-list2.options[4] = new Option('Angamaly Station (AFK)', '4');
-list2.options[5] = new Option('Chalakudi Railway Station (CKI)', '5');
+list2.options[1] = new Option('Ernakulam Junction South (ERS)', 'Ernakulam Junction South (ERS)');
+list2.options[2] = new Option('Thiruvananthapuram Central Station (TVC)', 'Thiruvananthapuram Central Station (TVC)');
+list2.options[3] = new Option('Ernakulam Town Station (ERN)', 'Ernakulam Town Station (ERN)');
+list2.options[4] = new Option('Angamaly Station (AFK)', 'Angamaly Station (AFK)');
+list2.options[5] = new Option('Chalakudi Railway Station (CKI)', 'Chalakudi Railway Station (CKI)');
 
 
 }
-else if (list1 =='2')
+else if (list1 =='Police')
 {
 
 list2.options.length=0;
 list2.options[0] = new Option('--Select--', '');
-list2.options[1] = new Option('Police Stations-THiruvanthapuram','');
-list2.options[2] = new Option('kollam', '');
-list2.options[3] = new Option('Pathanamthitta', '');
-list2.options[4] = new Option('alappuzha', '');
-list2.options[5] = new Option('Kottayam', '');
+list2.options[1] = new Option('Police Stations-THiruvanthapuram','Police Stations-THiruvanthapuram');
+list2.options[2] = new Option('kollam', 'kollam');
+list2.options[3] = new Option('Pathanamthitta', 'Pathanamthitta');
+list2.options[4] = new Option('alappuzha', 'alappuzha');
+list2.options[5] = new Option('Kottayam', 'Kottayam');
 
 }
 }
@@ -189,8 +189,8 @@ htm = `
 <div class ="row col-md-4 col-xs-12 col-sm-6 col-md-9">
 <select class="custom-select"  id='firstList' name='firstList' onclick="getauth()" required>
 <option class="dropdown-item" value="0">--Select--</option>
-						  <option class="dropdown-item" value="1">Railways</option>
-						  <option class="dropdown-item" value="2">Police</option>
+						  <option class="dropdown-item" value="Railways">Railways</option>
+						  <option class="dropdown-item" value="Police">Police</option>
 						  
 </select>
  
@@ -203,16 +203,16 @@ htm = `
   
 <div style="margin: 20px;"><b>Date</b></div>
     <div class="col-10"style="margin-bottom:10px;">
-      <input class="form-control" type="date" value="" id="date" required>
+      <input class="form-control" name="date" type="date" id="date" required>
     </div>
   <div class="row">
   <div class="col-10" style="margin-bottom:10px;">
   <div style="margin: 20px;"><b>Start Time</b></div>
-    <input class="form-control" type="time" value="" id="starttime"  required>
+    <input class="form-control" name="starttime" type="time" value="" id="starttime"  required>
   </div> <br>
   <div class="col-10">
   <div style="margin: 20px;"><b>End Time</b></div>
-  <input class="form-control" type="time" value="" id="endtime" required>          
+  <input class="form-control" name = "endtime" type="time" value="" id="endtime" required>          
 </div>
 </div><br>
 

@@ -132,7 +132,7 @@ function hidepreview()
       {% block body %} 
 
       <div class="container" id="curent" style="margin-top: 100px;border-color:#2dc997; border-radius: 10px; margin-bottom: 30px; border-style: solid; max-width: 90%; min-width: 300px;">
-      <form action="http://localhost:5000/upload" method="POST" enctype="multipart/form-data" id="videocheck" >
+      <form action="/upload" method="POST" enctype="multipart/form-data" id="videocheck" >
         
           
             {% with messages = get_flashed_messages() %}

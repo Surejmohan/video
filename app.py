@@ -9,6 +9,7 @@ from flask.helpers import flash, get_flashed_messages, send_from_directory
 from flask import url_for,session,logging,request
 from _datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+
 #end
 
 
@@ -16,6 +17,7 @@ from flask_sqlalchemy import SQLAlchemy
 UPLOAD_FOLDER = './uploads'
 UPLOAD_VIDEO = './video'
 DOWNLOAD = './result'
+THIRDVIDEO = './third_video'
 ALLOWED_FILEEXTENSIONS = set(['jpg','jpeg'])
 ALLOWED_VIDEOEXTENSIONS = set(['mp4'])
 
@@ -23,6 +25,8 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['UPLOAD_VIDEO'] = UPLOAD_VIDEO
 app.config['DOWNLOAD'] = DOWNLOAD
+app.config['THIRDVIDEO'] = THIRDVIDEO
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///main.db'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['SECRET_KEY'] = 'secret'
@@ -36,6 +40,144 @@ facerec = dlib.face_recognition_model_v1('models/dlib_face_recognition_resnet_mo
 
 #database models
 db = SQLAlchemy(app)
+
+class User(db.Model):
+    __tablename__ = 'User'
+    id = db.Column(db.Integer, autoincrement=True)
+    username = db.Column(db.String(50),unique=True, nullable=False,primary_key=True)
+    password = db.Column(db.String(15),nullable=False)
+    type = db.Column(db.String(15),nullable=False)
+
+    def __init__(self,username,password,type):
+        self.username=username
+        self.password=password
+        self.type=type
+    
+class Admin(db.Model):
+    __tablename__ = 'Admin'
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    fname = db.Column(db.String(50))
+    lname = db.Column(db.String(50))
+    phone = db.Column(db.String(50))
+    mail = db.Column(db.String(50))
+    admin_id=db.Column(db.Integer)
+    usr_name = db.Column(db.String, db.ForeignKey('User.username'),nullable=False)
+
+    def __init__(self,usr_name,fname,lname,phone,mail,admin_id):
+        self.usr_name=usr_name
+        self.fname=fname
+        self.lname=lname
+        self.phone=phone
+        self.mail=mail
+        self.admin_id=admin_id 
+        
+class Authority(db.Model):
+    __tablename__ = 'Authority'
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    fname = db.Column(db.String(50))
+    lname = db.Column(db.String(50))
+    phone = db.Column(db.Integer)
+    mail = db.Column(db.String(50))
+    job = db.Column(db.String(50))
+    proof=db.Column(db.String(40))
+    confirm=db.Column(db.Boolean,unique=False, default=False)
+    usr_name = db.Column(db.String, db.ForeignKey('User.username'),nullable=False)
+    
+
+    def __init__(self,usr_name,fname,lname,phone,mail,job,proof,confirm):
+        self.usr_name=usr_name
+        self.fname=fname
+        self.lname=lname
+        self.phone=phone
+        self.mail=mail
+        self.job=job
+        self.proof=proof 
+        self.confirm=confirm
+
+class Ordinary(db.Model):
+    __tablename__ = 'Ordinary'
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    fname = db.Column(db.String(30))
+    lname = db.Column(db.String(30))
+    phone = db.Column(db.Integer)
+    mail = db.Column(db.String(30))
+    state = db.Column(db.String(30))
+    city = db.Column(db.String(30))
+    proof=db.Column(db.String(40))
+    address=db.Column(db.String(50))
+    zip = db.Column(db.Integer)
+    confirm=db.Column(db.Boolean,unique=False, default=False)
+    usr_name = db.Column(db.String, db.ForeignKey('User.username'),nullable=False)
+    
+
+    def __init__(self,usr_name,fname,lname,phone,mail,state,city,address,zip,proof,confirm):
+        self.usr_name=usr_name
+        self.fname=fname
+        self.lname=lname
+        self.phone=phone
+        self.mail=mail
+        self.state=state
+        self.proof=proof    
+        self.address=address
+        self.city=city
+        self.zip=zip
+        self.confirm=confirm
+
+
+class Other(db.Model):
+    __tablename__ = 'Other'
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    admin_approval = db.Column(db.String(5))
+    admin_id =  db.Column(db.Integer)
+    no_of_video_upload = db.Column(db.Integer)
+    no_of_video_request = db.Column(db.Integer)
+    third_party_issue_id = db.Column(db.Integer)
+    third_party_pending_order = db.Column(db.String(10))
+    third_party_response = db.Column(db.String(20))  #video not available or available
+    date= db.Column(db.String(20))
+    start_time = db.Column(db.String(20))
+    end_time = db.Column(db.String(20))
+    live_recording_no=db.Column(db.Integer)
+    usr_name = db.Column(db.String, db.ForeignKey('User.username'),nullable=False)
+    
+
+    def __init__(self,admin_approval,admin_id,no_of_video_upload,no_of_video_request,third_party_issue_id,third_party_pending_order,third_party_response,date,start_time,end_time,live_recording_no,usr_name):
+        self.admin_approval=admin_approval
+        self.admin_id=admin_id
+        self.no_of_video_request=no_of_video_upload
+        self.third_party_issue_id=third_party_issue_id
+        self.third_party_pending_order=third_party_pending_order
+        self.third_party_response=third_party_response
+        self.date=date    
+        self.start_time=start_time
+        self.end_time=end_time
+        self.live_recording_no=live_recording_no
+        self.usr_name=usr_name
+
+
+    
+
+
+
+class Third(db.Model):
+    __tablename__ = 'Third'
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    dept = db.Column(db.String(50))
+    name = db.Column(db.String(50))
+    mail = db.Column(db.String(50))
+    Third_party_id = db.Column(db.Integer)
+    phone = db.Column(db.Integer)
+    usr_name = db.Column(db.String, db.ForeignKey('User.username'),nullable=False)
+
+    def __init__(self,usr_name,dept,name,mail,third_party_id,phone):
+        self.usr_name=usr_name
+        self.dept=dept
+        self.name=name
+        self.phone=phone
+        self.mail=mail
+        self.third_party_id=third_party_id
+        
+
 
 
 #end    
@@ -116,14 +258,207 @@ def current():
     return render_template('current.html')
 
 
+
 @app.route('/master')
 def current1():
     return render_template('output.html')
 
 
+
 @app.route('/result/<path:filename>', methods=['GET', 'POST'])
 def download(filename):
     return send_from_directory(directory='result', filename=filename)
+
+
+
+@app.route('/thirdparty')
+def  dashboard():
+    all = Other.query.filter_by(third_party_issue_id = 'TPD').all()
+    len1 = len(all)
+    print(len1)
+    return render_template('newthird.html',all=all,len1=len1)
+
+
+
+@app.route('/thirdparty/pendinguser',methods=['POST'])
+def  PendingUser():
+
+        if request.method == 'POST':
+
+            file = request.files['video']
+            userid = request.form['userid']
+            username = request.form['username']
+            response = request.form['response']
+            print(file.filename)
+            file.filename = username + ".mp4"
+            print(file.filename)
+            print(username)
+            if request.form['accept'] == "accept":
+
+                    if not allowed_file2(file.filename):
+                        flash('Invalid Video Format ;Only Mp4 Supported')
+                        print("Invalid Video Format ;Only Mp4 Supported")
+                        return redirect(url_for('current'))
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(app.config['THIRDVIDEO'], filename))
+                    ord = Other.query.filter_by(id = userid).first()
+                    ord.third_party_pending_order = 'yes'
+                    ord.third_party_response = response
+                    db.session.add(ord)
+                    db.session.commit()
+                    return "finished"
+            elif request.form['accept'] == "reject":
+                    ord = Other.query.filter_by(id = userid).first()
+                    ord.third_party_pending_order = 'incomplete'
+                    ord.third_party_response = response
+                    db.session.add(ord)
+                    db.session.commit()
+                    return "cancel"
+
+            
+            
+             
+                
+
+             
+
+
+
+
+
+@app.route('/thirdparty/realtimevideo',methods=['POST'])
+def  reatimevideo():
+
+    filelist = [f for f in os.listdir('uploads/')]
+    for f in filelist:
+        os.remove(os.path.join('uploads/', f))
+
+    if request.method == 'POST':
+        
+        uploaded_files = request.files.getlist("livefile")
+        for f in uploaded_files:
+            if f and allowed_file1(f.filename):
+                filename = secure_filename(f.filename)
+                f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            else:
+                flash("Invalid Input File Format; only jpeg or jpg supported")
+                print("Invalid Input File Format; only jpeg or jpg supported")
+                return redirect(url_for('/thirdparty'))
+        
+        myimages = []
+        dirfiles = os.listdir('uploads/')
+        sorted(dirfiles)
+        for files in dirfiles:
+            if '.jpg' in files:
+                myimages.append(files)
+            if '.jpeg' in files:
+                myimages.append(files)
+        no_of_images = len(myimages)
+        if no_of_images > 2:
+            flash('Maximum Number of Images is 2')
+            print("Maximum Number of Images is 2 ")
+            filelist = [f for f in os.listdir('uploads/')]
+            for f in filelist:
+                os.remove(os.path.join('uploads/', f))
+            return redirect(url_for('thirdparty'))
+
+
+        names = [x[:-4] for x in myimages]
+        paths = ['uploads/' + x for x in myimages]
+        print(names) 
+    
+        descs = {}
+
+        for i in range(0,no_of_images):    
+            img_bgr = cv2.imread(paths[i])
+            image = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+            if len(detector(image, 1)) > 1 :
+                flash('Please change image: ' + myimages[i] + ' - it has ' + str(len(detector(image, 1))) + "faces")
+                print("Please change image: " + myimages[i] + " - it has " + str(len(detector(image, 1))) + " faces; it can only have one")
+                return redirect(url_for('thirdparty'))
+
+            _ ,img_shapes, _ = find_faces(image,myimages[i])
+            descs[i] = encode_faces(image, img_shapes)[0]
+        if request.form['subm'] == 'submit':
+            np.save('train/descs.npy', descs)
+            descs = np.load('train/descs.npy',allow_pickle=True)[()]
+            
+            cap = cv2.VideoCapture(0)
+            if not cap.isOpened():
+                flash('Camera is not working')
+                print("Camera is not working")
+                return redirect(url_for('thirdparty'))
+        
+            _, img_bgr = cap.read()
+            padding_size = 0
+            resized_width = 1360
+            video_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1]))
+            output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
+
+            fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+            writer = cv2.VideoWriter('result/output.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
+            m=-1
+            i=1
+            s=0
+            while True:
+                        
+                ret, img_bgr = cap.read()
+                if not ret:
+                    break
+
+                img_bgr = cv2.resize(img_bgr, video_size)
+                img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+                dets = detector(img_bgr, 1)
+
+                for k, d in enumerate(dets):
+                    shape = sp(img_rgb, d)
+                    face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
+
+                    last_found = {'name': 'unknown', 'dist': 0.48, 'color': (0,0,255)}
+
+                    for name, saved_desc in descs.items():
+                        dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
+
+                        if dist < last_found['dist']:
+                            last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255)}
+                            if m == -1:
+                                s = i
+                                m=0
+                                    
+                    cv2.rectangle(img_bgr, pt1=(d.left(), d.top()), pt2=(d.right(), d.bottom()), color=last_found['color'], thickness=2)
+                    cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
+                i=i+1
+                writer.write(img_bgr)
+                cv2.imshow('img', img_bgr)
+                if cv2.waitKey(1) == ord('q'):
+                    break
+                    
+                
+            cap.release()
+            writer.release()
+            time = convert(s/24)
+            print(convert(s/24)) 
+            success = "You have successfully Processed the Video"
+            return render_template('newthird.html')
+    
+
+
+    else:
+        print("Error")
+        exit()
+
+
+
+
+
+
+
+
+
+
+
+    
+
 
 
 
@@ -174,14 +509,14 @@ def train():
             img_bgr = cv2.imread(paths[i])
             image = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
             if len(detector(image, 1)) > 1 :
-                flash('Please change image: ' + myimages[i] + ' - it has ' + str(len(detector(image, 1))))
+                flash('Please change image: ' + myimages[i] + ' - it has ' + str(len(detector(image, 1))) + "faces")
                 print("Please change image: " + myimages[i] + " - it has " + str(len(detector(image, 1))) + " faces; it can only have one")
                 return redirect(url_for('current'))
 
             _ ,img_shapes, _ = find_faces(image,myimages[i])
             descs[i] = encode_faces(image, img_shapes)[0]
         if request.form['action'] == 'Request_Video':
-            np.save('third/username.npy', descs)
+            np.save('third_image/username.npy', descs)
 
             name = request.form['firstList']
             dept = request.form['secondList']
@@ -195,8 +530,12 @@ def train():
             print(start_time)
             print(end_time)
 
-            send = Other()
-
+            send = Other(admin_approval = 'yes' , admin_id = 'AD',no_of_video_upload = 3 
+            ,no_of_video_request = 1,third_party_issue_id = 'TPD' ,third_party_pending_order = 'no' 
+            ,third_party_response = '',date = date,start_time = start_time ,end_time = end_time,
+            live_recording_no = 10,usr_name = 'Surejmohan')
+            db.session.add(send)
+            db.session.commit()
 
 
 
@@ -325,7 +664,7 @@ def train():
                     shape = sp(img_rgb, d)
                     face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
 
-                    last_found = {'name': 'unknown', 'dist': 0.45, 'color': (0,0,255)}
+                    last_found = {'name': 'unknown', 'dist': 0.48, 'color': (0,0,255)}
 
                     for name, saved_desc in descs.items():
                         dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)

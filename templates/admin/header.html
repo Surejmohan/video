@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  
+  
+  <link rel="apple-touch-icon" sizes="76x76" href="{{url_for('static', filename='img/apple-icon.png')}}">
+
+
+  <link rel="icon" type="image/png" href="{{url_for('static', filename='img/favicon.png')}}">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+  
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+ 
+
+  <title>
+    ThirdParty
+  </title>
+  <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/material-dashboard.min.css') }}"> 
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='demo/demo.css') }}">
+  <style>
+    
+    input::placeholder {
+    color:black;
+  }
+  
+    </style>
+
+
+
+  <script>
+
+
+
+$("#close").click(function ()
+ {
+  $("#reject").hide();
+});
+
+
+
+function PendingUsers()
+{
+  
+  $("#updatediv").hide();
+  $("#liverecord").hide();  
+  document.getElementById("pending").style.display = 'block';
+  $("#pending").show();
+
+
+}
+
+function Liverecording()
+{
+  $("#updatediv").hide(); 
+  $("#pending").hide(); 
+  document.getElementById("liverecord").style.display = 'block';
+  $("#liverecord").show();
+
+}
+
+
+function UpdatePassword()
+{
+
+  $("#pending").hide();
+  $("#liverecord").hide();
+  document.getElementById("updatediv").style.display = 'block';
+  $("#updatediv").show();
+  
+  
+
+}
+function Reject()
+{
+  document.getElementById("reject").style.display = 'block';
+}
+
+
+
+
+  </script>
+
+
+
+
+</head>
+
+<body class="dark-edition">
+  <body class="dark-edition">
+    <div class="wrapper">
+      <div class="sidebar" data-color="purple" data-background-color="black" data-image="{{url_for('static', filename='img/sidebar-2.jpg')}}">
+        <div class="logo"><a href="/" class="simple-text logo-normal">
+            PINPOINT THIRD PARTY
+          </a></div>
+        <div class="sidebar-wrapper">
+          <ul class="nav">
+            <li class="nav-item active ">
+              <a class="nav-link " href="/thirdparty">
+                <i class="material-icons">dashboard</i>
+                <p>Dashboard</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#pending" onclick="PendingUsers();">
+                <i class="material-icons">accessibility</i>
+                <p>Pending Users</p>
+              </a>
+            </li>
+          
+            <li class="nav-item ">
+              <a class="nav-link" href="#liverecord" onclick="Liverecording();">
+                <i class="material-icons">add_circle</i>
+                <p>Live Recodings</p>
+              </a>
+            </li>
+            <li class="nav-item ">
+              <a class="nav-link" href="#editthird" onclick="Editprofile();">
+                <i class="material-icons">add_circle</i>
+                <p>Edit Profile</p>
+              </a>
+            </li>
+            <li class="nav-item ">
+              <a class="nav-link" href="#updatediv" onclick="UpdatePassword();">
+                <i class="material-icons">content_cut</i>
+                <p>Update Password</p>
+              </a>
+            </li>
+            <li class="nav-item ">
+           
+          </ul>
+        </div>
+      </div>
+      <div class="main-panel">

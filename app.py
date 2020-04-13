@@ -273,10 +273,17 @@ def download(filename):
 
 @app.route('/thirdparty')
 def  dashboard():
-    all = Other.query.filter_by(third_party_issue_id = 'TPD').all()
+    all = Other.query.filter_by(third_party_issue_id = 'TPD',third_party_pending_order = 'no').all()
     len1 = len(all)
-    print(len1)
-    return render_template('newthird.html',all=all,len1=len1)
+    if (len1 == 0):
+        value = 'None'
+        flash("You do not have any Request")
+        return render_template('newthird.html',all=all,value = value)
+
+    else:
+        value = 'success'
+        flash("You Have " + str(len1) + " Request")
+        return render_template('newthird.html',all=all,value = value)
 
 
 
@@ -290,15 +297,16 @@ def  PendingUser():
             username = request.form['username']
             response = request.form['response']
             print(file.filename)
-            file.filename = username + ".mp4"
-            print(file.filename)
             print(username)
             if request.form['accept'] == "accept":
 
                     if not allowed_file2(file.filename):
                         flash('Invalid Video Format ;Only Mp4 Supported')
                         print("Invalid Video Format ;Only Mp4 Supported")
-                        return redirect(url_for('current'))
+                        category = 'errorvideo'
+                        return render_template('newthird.html',category = category)
+                    file.filename = username + ".mp4"
+                    print(file.filename)
                     filename = secure_filename(file.filename)
                     file.save(os.path.join(app.config['THIRDVIDEO'], filename))
                     ord = Other.query.filter_by(id = userid).first()
@@ -306,14 +314,18 @@ def  PendingUser():
                     ord.third_party_response = response
                     db.session.add(ord)
                     db.session.commit()
-                    return "finished"
+                    category = 'success1'
+                    flash("You have successfully submit Video")
+                    return render_template('newthird.html',category = category)
             elif request.form['accept'] == "reject":
                     ord = Other.query.filter_by(id = userid).first()
                     ord.third_party_pending_order = 'incomplete'
                     ord.third_party_response = response
                     db.session.add(ord)
                     db.session.commit()
-                    return "cancel"
+                    category = 'success2'
+                    flash("You have successfully  Sent your Response ")
+                    return render_template('newthird.html',category = category)
 
             
             
@@ -343,7 +355,8 @@ def  reatimevideo():
             else:
                 flash("Invalid Input File Format; only jpeg or jpg supported")
                 print("Invalid Input File Format; only jpeg or jpg supported")
-                return redirect(url_for('/thirdparty'))
+                category = 'errorimage'
+                return render_template('newthird.html',category = category)
         
         myimages = []
         dirfiles = os.listdir('uploads/')
@@ -360,7 +373,8 @@ def  reatimevideo():
             filelist = [f for f in os.listdir('uploads/')]
             for f in filelist:
                 os.remove(os.path.join('uploads/', f))
-            return redirect(url_for('thirdparty'))
+            category = 'errornumber'
+            return render_template('newthird.html',category = category)
 
 
         names = [x[:-4] for x in myimages]
@@ -373,9 +387,10 @@ def  reatimevideo():
             img_bgr = cv2.imread(paths[i])
             image = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
             if len(detector(image, 1)) > 1 :
-                flash('Please change image: ' + myimages[i] + ' - it has ' + str(len(detector(image, 1))) + "faces")
+                flash('Please change image: ' + myimages[i] + ' - it has ' + str(len(detector(image, 1))) + " faces")
                 print("Please change image: " + myimages[i] + " - it has " + str(len(detector(image, 1))) + " faces; it can only have one")
-                return redirect(url_for('thirdparty'))
+                category = 'errorface'
+                return render_template('newthird.html',category = category)
 
             _ ,img_shapes, _ = find_faces(image,myimages[i])
             descs[i] = encode_faces(image, img_shapes)[0]
@@ -387,7 +402,8 @@ def  reatimevideo():
             if not cap.isOpened():
                 flash('Camera is not working')
                 print("Camera is not working")
-                return redirect(url_for('thirdparty'))
+                category = 'errorcamera'
+                return render_template('newthird.html',category = category)
         
             _, img_bgr = cap.read()
             padding_size = 0
@@ -438,8 +454,9 @@ def  reatimevideo():
             writer.release()
             time = convert(s/24)
             print(convert(s/24)) 
-            success = "You have successfully Processed the Video"
-            return render_template('newthird.html')
+            flash("You have successfully Processed the Video")
+            category = 'success3'
+            return render_template('newthird.html',category = category)
     
 
 
@@ -455,9 +472,6 @@ def  reatimevideo():
 
 
 
-
-
-    
 
 
 

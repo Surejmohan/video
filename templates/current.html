@@ -193,7 +193,7 @@ function hidepreview()
                 <div  style="margin: 20px;"><b>Locate here</b></div>
                 {% for am in a %} 
                 
-                <select class="custom-select" style="display: none;" id = "{{a.index(am)}}" name='secondList'>
+                <select class="custom-select" style="display: none;" id = "{{a.index(am)}}" name='secondList{{a.index(am)}}'>
                 <option class="dropdown-item" value="">--Select--</option>
                 {% for ah in am %}
                 <option class="dropdown-item" value="{{ah.name}}">{{ah.name}}</option>

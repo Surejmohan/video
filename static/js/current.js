@@ -60,10 +60,7 @@ function resetthird() {
   $("#mass").hide();
   $("#live").hide();
   document.getElementById("firstList").required = false;
-  document.getElementById("secondList").required = false;
-  document.getElementById("starttime").required = false;
-  document.getElementById("endtime").required = false;
-  document.getElementById("date").required = false;
+ 
 }
 
 

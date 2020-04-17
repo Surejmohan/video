@@ -289,6 +289,13 @@ def current():
     for al in all:
         a.append(Third.query.filter_by(dept = al[0]).all())
     print(a)
+    for am in a:
+        print(a.index(am))
+        for ah in am:
+            print(ah.name)
+    for al in all:
+        print(all.index(al))
+
 
 
     return render_template('current.html',all=all,a=a)
@@ -558,22 +565,36 @@ def train():
         if request.form['action'] == 'Request_Video':
             np.save('third_image/username.npy', descs)
 
-            name = request.form['firstList']
-            dept = request.form['secondList']
+            dept = request.form['firstList']
+            name = request.form['secondList'+ dept]
             date = request.form.get('date')
             start_time = request.form.get('starttime')
             end_time = request.form.get('endtime')
 
-            print(name)
+
             print(dept)
+            print(name)
             print(date)
             print(start_time)
             print(end_time)
 
-            send = Other(admin_approval = 'yes' , admin_id = 'AD',no_of_video_upload = 3 
-            ,no_of_video_request = 1,third_party_issue_id = 'TPD' ,third_party_pending_order = 'no' 
-            ,third_party_response = '',date = date,start_time = start_time ,end_time = end_time,
-            live_recording_no = 10,usr_name = 'Surejmohan')
+            fish = db.session.query(Third.dept.distinct()).all()
+            print(fish[int(dept)][0])
+            depta = fish[int(dept)][0]
+
+            mass = Third.query.filter_by(dept = depta, name = name).first()
+            print(mass.third_party_id)
+            ID = mass.third_party_id
+            
+            send = Other.query.filter_by(usr_name = 'Surejmohan').first()
+            send.third_party_issue_id = ID
+            send.third_party_pending_order = 'no'
+            send.third_party_response = ''
+            send.date = date
+            send.start_time = start_time
+            send.end_time = end_time
+            send.no_of_video_request = 1
+
             db.session.add(send)
             db.session.commit()
             flash("You have successfully submit your request. Please  Wait for the notification Mail ")

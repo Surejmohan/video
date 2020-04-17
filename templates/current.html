@@ -176,7 +176,67 @@ function hidepreview()
           </div>
             <div id = "video">
             </div>
-            <div id = "third">
+            <div id = "third" style="display: none;">
+
+              <centre>
+                <div class="col-md-4" id ="mass">
+                <div style="margin: 20px;"><b>Department</b></div>
+                <div class ="row col-md-4 col-xs-12 col-sm-6 col-md-9">
+                <select class="custom-select"  id='firstList' name='firstList' onclick="getauth(this.value)" >
+                <option class="dropdown-item" value="">--Select--</option>
+                {% for al in all %}
+                              <option class="dropdown-item" value="{{all.index(al)}}">{{al[0]}}</option>
+                {% endfor %}
+                              
+                </select>
+                
+                <div  style="margin: 20px;"><b>Locate here</b></div>
+                {% for am in a %} 
+                
+                <select class="custom-select" style="display: none;" id = "{{a.index(am)}}" name='secondList'>
+                <option class="dropdown-item" value="">--Select--</option>
+                {% for ah in am %}
+                <option class="dropdown-item" value="{{ah.name}}">{{ah.name}}</option>
+                {% endfor %}
+                </select>
+                
+                {% endfor %}
+                </div>
+                
+                <br>
+                
+                
+                  
+                <div style="margin: 20px;"><b>Date</b></div>
+                    <div class="col-10"style="margin-bottom:10px;">
+                      <input class="form-control" name="date" type="date" id="date">
+                    </div>
+                  <div class="row">
+                  <div class="col-10" style="margin-bottom:10px;">
+                  <div style="margin: 20px;"><b>Start Time</b></div>
+                    <input class="form-control" name="starttime" type="time" value="" id="starttime">
+                  </div> <br>
+                  <div class="col-10">
+                  <div style="margin: 20px;"><b>End Time</b></div>
+                  <input class="form-control" name = "endtime" type="time" value="" id="endtime" >          
+                </div>
+                </div><br>
+                
+                
+                
+                <div class ="row col-md-4 col-xs-12 col-sm-6 col-md-9">
+                <input type="submit" name="action" value = "Request_Video" class="btn btn-primary pull-left" style="min-width:200px;max-width: 300px;margin-left: 10px; background-color:#2dc997; margin-bottom: 10px;" onclick="processingthird();" />
+                <button type="button" class="btn btn-danger pull-left" style="min-width:200px;max-width: 200px;margin-left: 10px; margin-bottom: 10px;" onclick="resetthird()"> Reset The Field
+                          </button>
+                        </div>
+                 <br><br><br>
+                </div>
+                
+                <br><br>
+                </centre>
+                
+
+
             </div>
             <div id = "live">
             </div>

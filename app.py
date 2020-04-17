@@ -14,6 +14,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 
 #intialise direectories and keys
+
 UPLOAD_FOLDER = './uploads'
 UPLOAD_VIDEO = './video'
 DOWNLOAD = './result'
@@ -30,6 +31,7 @@ app.config['THIRDVIDEO'] = THIRDVIDEO
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///main.db'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['SECRET_KEY'] = 'secret'
+
 #end
 
 #import ML models 
@@ -40,7 +42,9 @@ facerec = dlib.face_recognition_model_v1('models/dlib_face_recognition_resnet_mo
 
 #database models
 db = SQLAlchemy(app)
+#db is the refrence
 
+#User table
 class User(db.Model):
     __tablename__ = 'User'
     id = db.Column(db.Integer, autoincrement=True)
@@ -53,6 +57,7 @@ class User(db.Model):
         self.password=password
         self.type=type
     
+#Admin Table
 class Admin(db.Model):
     __tablename__ = 'Admin'
     id = db.Column(db.Integer, primary_key=True,autoincrement=True)
@@ -60,7 +65,7 @@ class Admin(db.Model):
     lname = db.Column(db.String(50))
     phone = db.Column(db.String(50))
     mail = db.Column(db.String(50))
-    admin_id=db.Column(db.Integer)
+    admin_id = db.Column(db.String(20))
     usr_name = db.Column(db.String, db.ForeignKey('User.username'),nullable=False)
 
     def __init__(self,usr_name,fname,lname,phone,mail,admin_id):
@@ -71,6 +76,7 @@ class Admin(db.Model):
         self.mail=mail
         self.admin_id=admin_id 
         
+#Authority Table
 class Authority(db.Model):
     __tablename__ = 'Authority'
     id = db.Column(db.Integer, primary_key=True,autoincrement=True)
@@ -94,6 +100,8 @@ class Authority(db.Model):
         self.proof=proof 
         self.confirm=confirm
 
+
+#Ordinary Table
 class Ordinary(db.Model):
     __tablename__ = 'Ordinary'
     id = db.Column(db.Integer, primary_key=True,autoincrement=True)
@@ -124,6 +132,7 @@ class Ordinary(db.Model):
         self.confirm=confirm
 
 
+#Other Table
 class Other(db.Model):
     __tablename__ = 'Other'
     id = db.Column(db.Integer, primary_key=True,autoincrement=True)
@@ -133,7 +142,7 @@ class Other(db.Model):
     no_of_video_request = db.Column(db.Integer)
     third_party_issue_id = db.Column(db.Integer)
     third_party_pending_order = db.Column(db.String(10))
-    third_party_response = db.Column(db.String(20))  #video not available or available
+    third_party_response = db.Column(db.String(20))  #video available or not
     date= db.Column(db.String(20))
     start_time = db.Column(db.String(20))
     end_time = db.Column(db.String(20))
@@ -155,17 +164,14 @@ class Other(db.Model):
         self.usr_name=usr_name
 
 
-    
-
-
-
+#Third table
 class Third(db.Model):
     __tablename__ = 'Third'
     id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     dept = db.Column(db.String(50))
     name = db.Column(db.String(50))
     mail = db.Column(db.String(50))
-    Third_party_id = db.Column(db.Integer)
+    third_party_id = db.Column(db.String(20))
     phone = db.Column(db.Integer)
     usr_name = db.Column(db.String, db.ForeignKey('User.username'),nullable=False)
 
@@ -176,16 +182,34 @@ class Third(db.Model):
         self.phone=phone
         self.mail=mail
         self.third_party_id=third_party_id
+
+
+#Count table
+class Count(db.Model):
+    __tablename__ = 'Count'
+    id = db.Column(db.Integer, primary_key=True)
+    Ordinary = db.Column(db.Integer)
+    Authority = db.Column(db.Integer)
+    Admin = db.Column(db.Integer)
+    Third_party = db.Column(db.Integer)
+    Total_Real= db.Column(db.Integer)
+    Total_upload = db.Column(db.Integer)
+    Total_request = db.Column(db.Integer)
+
+    def __init__(self,id,Ordinary,Authority,Admin,Third_party,Total_Real,Total_upload,Total_request):
+        self.id = id
+        self.Ordinary = Ordinary
+        self.Authority = Authority
+        self.Admin = Admin
+        self.Third_party = Third_party
+        self.Total_Real = Total_Real
+        self.Total_upload = Total_upload
+        self.Total_request = Total_request
         
+#end
 
 
-
-#end    
-
-
-
-
-
+#ML Functions
 
 # findface function
 def find_faces(image,name):
@@ -247,15 +271,27 @@ def allowed_file2(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_VIDEOEXTENSIONS
 #end
 
+#end
+
 
 
 
 #contollers
 
+# Current page 
 
 @app.route('/current')
 def current():
-    return render_template('current.html')
+    all = db.session.query(Third.dept.distinct()).all()
+    print(all[0][0])
+    a = []
+    len1 = len(all)
+    for al in all:
+        a.append(Third.query.filter_by(dept = al[0]).all())
+    print(a)
+
+
+    return render_template('current.html',all=all,a=a)
 
 
 
@@ -269,7 +305,9 @@ def current1():
 def download(filename):
     return send_from_directory(directory='result', filename=filename)
 
+#end
 
+#Thirdparty Page
 
 @app.route('/thirdparty')
 def  dashboard():
@@ -328,14 +366,6 @@ def  PendingUser():
                     return render_template('newthird.html',category = category)
 
             
-            
-             
-                
-
-             
-
-
-
 
 
 @app.route('/thirdparty/realtimevideo',methods=['POST'])
@@ -412,7 +442,7 @@ def  reatimevideo():
             output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
 
             fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-            writer = cv2.VideoWriter('result/output.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
+            writer = cv2.VideoWriter('result/username.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
             m=-1
             i=1
             s=0
@@ -465,19 +495,15 @@ def  reatimevideo():
         exit()
 
 
+#end
 
 
 
-
-
-
-
-
-
-
+# Upload page 
 
 @app.route('/upload', methods=['POST'])
 def train():
+    
     filelist = [f for f in os.listdir('uploads/')]
     for f in filelist:
         os.remove(os.path.join('uploads/', f))
@@ -550,19 +576,16 @@ def train():
             live_recording_no = 10,usr_name = 'Surejmohan')
             db.session.add(send)
             db.session.commit()
-
-
-
-
-            return render_template('output.html')
+            flash("You have successfully submit your request. Please  Wait for the notification Mail ")
+            return render_template('output.html' ,output = 1)
 
 
 
 
            
         elif request.form['action'] == "Upload":
-            np.save('train/descs.npy', descs)
-            descs = np.load('train/descs.npy',allow_pickle=True)[()]
+            np.save('train/username.npy', descs)
+            descs = np.load('train/username.npy',allow_pickle=True)[()]
             filelist2 = [f for f in os.listdir('video/')]
             for f in filelist2:
                 os.remove(os.path.join('video/', f))
@@ -591,7 +614,7 @@ def train():
                     output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
 
                     fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-                    writer = cv2.VideoWriter('result/output.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
+                    writer = cv2.VideoWriter('result/username.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
                     m=-1
                     i=1
                     s=0
@@ -644,8 +667,8 @@ def train():
 
 
         elif request.form['action'] == "ON":
-            np.save('train/descs.npy', descs)
-            descs = np.load('train/descs.npy',allow_pickle=True)[()]
+            np.save('train/username.npy', descs)
+            descs = np.load('train/username.npy',allow_pickle=True)[()]
             
             cap = cv2.VideoCapture(0)
             if not cap.isOpened():
@@ -660,7 +683,7 @@ def train():
             output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
 
             fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-            writer = cv2.VideoWriter('result/output.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
+            writer = cv2.VideoWriter('result/username.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
             m=-1
             i=1
             s=0
@@ -693,9 +716,9 @@ def train():
                     cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
                 i=i+1
                 writer.write(img_bgr)
-                #cv2.imshow('img', img_bgr)
-                #if cv2.waitKey(1) == ord('q'):
-                    #break
+                cv2.imshow('img', img_bgr)
+                if cv2.waitKey(1) == ord('q'):
+                    break
                     
                 
             cap.release()
@@ -711,10 +734,10 @@ def train():
         exit()
 
 
+#end
 
 #end
 
 
 if(__name__ == "__main__"):
-    #db.create_all()
     app.run(debug=True)

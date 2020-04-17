@@ -59,6 +59,11 @@ function resetthird() {
   $("#third").hide();
   $("#mass").hide();
   $("#live").hide();
+  document.getElementById("firstList").required = false;
+  document.getElementById("secondList").required = false;
+  document.getElementById("starttime").required = false;
+  document.getElementById("endtime").required = false;
+  document.getElementById("date").required = false;
 }
 
 
@@ -120,37 +125,17 @@ document.getElementById("video").innerHTML= htm;
 
 
 
-function getauth(){
-
-var list1 = document.getElementById('firstList').value;
-var list2 = document.getElementById("secondList");
-
-
-if (list1 =='Railways')
+function getauth(name)
 {
 
-list2.options.length=0;
-list2.options[0] = new Option('--Select--', '');
-list2.options[1] = new Option('Ernakulam Junction South (ERS)', 'Ernakulam Junction South (ERS)');
-list2.options[2] = new Option('Thiruvananthapuram Central Station (TVC)', 'Thiruvananthapuram Central Station (TVC)');
-list2.options[3] = new Option('Ernakulam Town Station (ERN)', 'Ernakulam Town Station (ERN)');
-list2.options[4] = new Option('Angamaly Station (AFK)', 'Angamaly Station (AFK)');
-list2.options[5] = new Option('Chalakudi Railway Station (CKI)', 'Chalakudi Railway Station (CKI)');
+document.getElementById(name).style.display = 'block';  
+document.getElementById(name).required = true;
+document.getElementById("date").required = true;
+document.getElementById("starttime").required = true;
+document.getElementById("endtime").required = true;
 
 
-}
-else if (list1 =='Police')
-{
 
-list2.options.length=0;
-list2.options[0] = new Option('--Select--', '');
-list2.options[1] = new Option('Police Stations-THiruvanthapuram','Police Stations-THiruvanthapuram');
-list2.options[2] = new Option('kollam', 'kollam');
-list2.options[3] = new Option('Pathanamthitta', 'Pathanamthitta');
-list2.options[4] = new Option('alappuzha', 'alappuzha');
-list2.options[5] = new Option('Kottayam', 'Kottayam');
-
-}
 }
 
 
@@ -181,58 +166,9 @@ function live()
 
 function third()
 {
-htm = `
+document.getElementById("third").style.display = 'block';
+document.getElementById("firstList").required = true;
 
-<centre>
-<div class="col-md-4" id ="mass">
-<div style="margin: 20px;"><b>Department</b></div>
-<div class ="row col-md-4 col-xs-12 col-sm-6 col-md-9">
-<select class="custom-select"  id='firstList' name='firstList' onclick="getauth()" required>
-<option class="dropdown-item" value="0">--Select--</option>
-						  <option class="dropdown-item" value="Railways">Railways</option>
-						  <option class="dropdown-item" value="Police">Police</option>
-						  
-</select>
- 
-<div style="margin: 20px;"><b>Locate here</b></div>
-<select class="custom-select"  id='secondList' name='secondList' required >
-</select>
-</div><br>
-
-
-  
-<div style="margin: 20px;"><b>Date</b></div>
-    <div class="col-10"style="margin-bottom:10px;">
-      <input class="form-control" name="date" type="date" id="date" required>
-    </div>
-  <div class="row">
-  <div class="col-10" style="margin-bottom:10px;">
-  <div style="margin: 20px;"><b>Start Time</b></div>
-    <input class="form-control" name="starttime" type="time" value="" id="starttime"  required>
-  </div> <br>
-  <div class="col-10">
-  <div style="margin: 20px;"><b>End Time</b></div>
-  <input class="form-control" name = "endtime" type="time" value="" id="endtime" required>          
-</div>
-</div><br>
-
-
-
-<div class ="row col-md-4 col-xs-12 col-sm-6 col-md-9">
-<input type="submit" name="action" value = "Request_Video" class="btn btn-primary pull-left" style="min-width:200px;max-width: 300px;margin-left: 10px; background-color:#2dc997; margin-bottom: 10px;" onclick="processingthird();" />
-<button type="button" class="btn btn-danger pull-left" style="min-width:200px;max-width: 200px;margin-left: 10px; margin-bottom: 10px;" onclick="resetthird()"> Reset The Field
-          </button>
-        </div>
- <br><br><br>
-</div>
-
-<br><br>
-</centre>
-
-
-
-`
-document.getElementById("third").innerHTML= htm;
 
 }
 

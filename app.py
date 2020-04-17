@@ -137,7 +137,7 @@ class Other(db.Model):
     __tablename__ = 'Other'
     id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     admin_approval = db.Column(db.String(5))
-    admin_id =  db.Column(db.Integer)
+    admin_id =  db.Column(db.String(20))
     no_of_video_upload = db.Column(db.Integer)
     no_of_video_request = db.Column(db.Integer)
     third_party_issue_id = db.Column(db.Integer)
@@ -318,7 +318,7 @@ def download(filename):
 
 @app.route('/thirdparty')
 def  dashboard():
-    all = Other.query.filter_by(third_party_issue_id = 'TPD',third_party_pending_order = 'no').all()
+    all = Other.query.filter_by(third_party_issue_id = 'Railway_1',third_party_pending_order = 'no').all()
     len1 = len(all)
     if (len1 == 0):
         value = 'None'

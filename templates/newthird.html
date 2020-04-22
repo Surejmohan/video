@@ -1,7 +1,25 @@
 
-{% include 'third/header.html' %}
+{% extends 'third/base.html' %}
 <!-- Navbar -->
+{% block navbar %}
+<nav id="nav-menu-container">
+  <ul class="nav-menu pull-right" style="margin: 30px;">
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret">USERNAME </span></a>
+      <ul class="dropdown-menu">
+        <li><a href="#editprofile" onclick="Updateprofile()">Edit Profile</a>
+        </li>
+        <li><a href="#updatediv" onclick="UpdatePassword()"> Change Password</a>
+        </li>
+        <li><a href="/logout">Logout</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+{% endblock %}
 
+{% block body %} 
 
 <div class="container mt-3" id="Message">
   {% with messages = get_flashed_messages() %}
@@ -230,7 +248,7 @@
              
               <form class="md-form" method="POST" action="/thirdparty/realtimevideo">
                 <div class="file-field">
-                  <div class="btn btn-primary  float-centre" >
+                  <div class="btn btn-primary float-centre" >
                     <span>Choose file</span>
                     <input type="file"  id ="livefile" name="livefile" accept=".jpg,.jpeg" multiple required>
                   </div>
@@ -247,39 +265,50 @@
 
 </div></div></div></div>
    
-      
-<div  id="updatediv" style="display: none;" >
 
-        <div class="container-fluid" style="margin-top: 100px; margin-bottom: 100px;padding: 2%; border-style: solid;
+<div  id="updatediv"style="display: none;" >
+
+  <div class="container-fluid" style="margin-top: 100px; margin-bottom: 100px;padding: 2%; border-style: solid;
 border-color:#2dc997; border-radius: 7%; max-width: 650px;background-color: aliceblue;">
-  <h2 style="text-align: center;font-weight: bold;"id ="login">UPDATE PASSWORD </h2>
- <center>
-  
-  <div class="container"> 
-    <form action="" id ="update" method ="POST">
-    <div class="col-xs-12 col-sm-6 col-md-9"> 
-    <br>
-    <div class="form-group">
-        <input class="form-control" style="color: black;" type="password" placeholder="Enter the current Password" id ="psw1" name="psw1"  pattern="[0-9a-zA-Z].{8,}" maxlength="12" title="It includes  numbers , uppercase,lowercase letter, and at least 8 or more characters required (Max length:12)" required >
-    </div>
+<h2 style="text-align: center;font-weight: bold;"id ="login">UPDATE PASSWORD </h2>
+<center>
 
-    <div class="form-group">
-        <input class="form-control" style="color: black;" type="password" placeholder="Enter the new Password" id ="psw2" name="psw2"  pattern="[0-9a-zA-Z].{8,}" maxlength="12" title="It includes  numbers , uppercase,lowercase letter, and at least 8 or more characters required (Max length:12)" required >
-    </div>
-    <div class="form-group">
-        <input class="form-control" style="color: black;" type="password" placeholder="Re-type the new Password" id ="psw3" name="psw3  pattern="[0-9a-zA-Z].{8,}" maxlength="12" title="It includes  numbers , uppercase,lowercase letter, and at least 8 or more characters required (Max length:12)" required >
-    </div>
+<div class="container"> 
+<form action="" id ="update" method ="POST">
+<div class="col-xs-12 col-sm-6 col-md-9"> 
+<br>
+<div class="form-group">
+  <input class="form-control" style="color: black;" type="password" placeholder="Enter the current Password" id ="psw1" name="psw1"  pattern="[0-9a-zA-Z].{8,}" maxlength="12" title="It includes  numbers , uppercase,lowercase letter, and at least 8 or more characters required (Max length:12)" required >
+</div>
 
-    <button class="btn btn-primary" type="submit" id="updatepassword" style="background-color:#2dc997;" >Update</button><br>
-    <br>
-  </div>
+<div class="form-group">
+  <input class="form-control" style="color: black;" type="password" placeholder="Enter the new Password" id ="psw2" name="psw2"  pattern="[0-9a-zA-Z].{8,}" maxlength="12" title="It includes  numbers , uppercase,lowercase letter, and at least 8 or more characters required (Max length:12)" required >
+</div>
+<div class="form-group">
+  <input class="form-control" style="color: black;" type="password" placeholder="Re-type the new Password" id ="psw3" name="psw3  pattern="[0-9a-zA-Z].{8,}" maxlength="12" title="It includes  numbers , uppercase,lowercase letter, and at least 8 or more characters required (Max length:12)" required >
+</div>
+
+<button class="btn btn-primary" type="submit" id="updatepassword" style="background-color:#2dc997;" >Update</button><br>
+<br>
+</div>
 </form>
 </div>
 </center> 
- </div>
 </div>
- 
-{% include 'third/footer.html' %}
+</div>
+      
+
+
+
+
+
+
+
+
+
+{% endblock %}
+
+
 
 
 

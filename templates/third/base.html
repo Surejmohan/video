@@ -7,7 +7,7 @@
   
   <link rel="apple-touch-icon" sizes="76x76" href="{{url_for('static', filename='img/apple-icon.png')}}">
 
-
+  
   <link rel="icon" type="image/png" href="{{url_for('static', filename='img/favicon.png')}}">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
@@ -23,6 +23,8 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/material-dashboard.min.css') }}"> 
   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='demo/demo.css') }}">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <style>
     
     input::placeholder {
@@ -49,6 +51,7 @@ function PendingUsers()
   
   $("#updatediv").hide();
   $("#liverecord").hide();  
+  $("#editprofile").hide();
   document.getElementById("pending").style.display = 'block';
   $("#pending").show();
 
@@ -59,6 +62,7 @@ function Liverecording()
 {
   $("#updatediv").hide(); 
   $("#pending").hide(); 
+  $("#editprofile").hide();
   document.getElementById("liverecord").style.display = 'block';
   $("#liverecord").show();
 
@@ -70,12 +74,24 @@ function UpdatePassword()
 
   $("#pending").hide();
   $("#liverecord").hide();
+  $("#editprofile").hide();
   document.getElementById("updatediv").style.display = 'block';
   $("#updatediv").show();
-  
-  
-
 }
+
+function Updateprofile()
+{
+  $("#pending").hide();
+  $("#liverecord").hide();
+  $("#updatediv").hide(); 
+  document.getElementById("editprofile").style.display = 'block';
+  $("#editprofile").show();
+}
+
+
+
+
+
 function Reject()
 {
   document.getElementById("reject").style.display = 'block';
@@ -119,21 +135,17 @@ function Reject()
                 <p>Realtime Video</p>
               </a>
             </li>
-            <li class="nav-item ">
-              <a class="nav-link" href="#editthird" onclick="Editprofile();">
-                <i class="material-icons">add_circle</i>
-                <p>Edit Profile</p>
-              </a>
-            </li>
-            <li class="nav-item ">
-              <a class="nav-link" href="#updatediv" onclick="UpdatePassword();">
-                <i class="material-icons">content_cut</i>
-                <p>Update Password</p>
-              </a>
-            </li>
-            <li class="nav-item ">
-           
           </ul>
         </div>
       </div>
       <div class="main-panel">
+            <!-- Navbar -->
+            {% block navbar %}
+      
+     
+     
+      {% endblock %}
+
+      {% block body %} {% endblock %}
+    {% include 'third/footer.html' %}
+

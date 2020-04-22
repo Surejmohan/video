@@ -278,46 +278,11 @@ def allowed_file2(filename):
 
 #contollers
 
-# Current page 
-
-@app.route('/current')
-def current():
-    all = db.session.query(Third.dept.distinct()).all()
-    print(all[0][0])
-    a = []
-    len1 = len(all)
-    for al in all:
-        a.append(Third.query.filter_by(dept = al[0]).all())
-    print(a)
-    for am in a:
-        print(a.index(am))
-        for ah in am:
-            print(ah.name)
-    for al in all:
-        print(all.index(al))
-
-
-
-    return render_template('current.html',all=all,a=a)
-
-
-
-@app.route('/master')
-def current1():
-    return render_template('output.html')
-
-
-
-@app.route('/result/<path:filename>', methods=['GET', 'POST'])
-def download(filename):
-    return send_from_directory(directory='result', filename=filename)
-
-#end
 
 #Thirdparty Page
 
 @app.route('/thirdparty')
-def  dashboard():
+def  thirddashboard():
     all = Other.query.filter_by(third_party_issue_id = 'Railway_1',third_party_pending_order = 'no').all()
     len1 = len(all)
     if (len1 == 0):
@@ -364,7 +329,7 @@ def  PendingUser():
                     return render_template('newthird.html',category = category)
             elif request.form['accept'] == "reject":
                     ord = Other.query.filter_by(id = userid).first()
-                    ord.third_party_pending_order = 'incomplete'
+                    ord.third_party_pending_order = 'reject'
                     ord.third_party_response = response
                     db.session.add(ord)
                     db.session.commit()
@@ -506,9 +471,75 @@ def  reatimevideo():
 
 
 
-# Upload page 
+# Current page 
 
-@app.route('/upload', methods=['POST'])
+@app.route('/user/current')
+def current():
+    all = db.session.query(Third.dept.distinct()).all()
+    print(all)
+    
+    a = []
+    len1 = len(all)
+    for al in all:
+        a.append(Third.query.filter_by(dept = al[0]).all())
+    print(a)
+    for am in a:
+        print(a.index(am))
+        for ah in am:
+            print(ah.name)
+    for al in all:
+        print(all.index(al))
+
+    id = User.query.filter_by(username = 'rajkumar123').first()
+    id2 = id.type
+    print(id2)
+    if(id.type == "Ordinary"):
+        pro = Ordinary.query.filter_by(usr_name = 'Surejmohan').first()
+        print(pro)
+
+    if(id.type == "Authority"):
+        pro = Authority.query.filter_by(usr_name = 'rajkumar123').first()
+
+    
+    if all == []:
+        return render_template('current.html',third = "third",profile=pro,id = id2)
+
+
+    return render_template('current.html',all=all,a=a,profile=pro,id = id2)
+
+
+
+@app.route('/user/output')
+def output():
+    return render_template('output.html')
+
+
+@app.route('/user/update/profile', methods=['POST'])
+def profileupdate():
+
+     if request.method == 'POST':
+         fname = request.form['fname']
+         lname = request.form['lname']
+
+
+         return ""
+
+
+
+@app.route('/user/update/password', methods=['POST'])
+def passwordupdate():
+    return ""
+
+
+
+
+@app.route('/user/result/<path:filename>', methods=['GET', 'POST'])
+def download(filename):
+    return send_from_directory(directory='result', filename=filename)
+
+
+
+@app.route('/user/upload', methods=['POST'])
 def train():
     
     filelist = [f for f in os.listdir('uploads/')]
@@ -758,6 +789,13 @@ def train():
 #end
 
 #end
+
+
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    return ""
+
 
 
 if(__name__ == "__main__"):

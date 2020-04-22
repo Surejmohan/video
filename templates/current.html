@@ -7,7 +7,7 @@
 <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
-
+<script defer src="{{ url_for('static',filename = 'js/state.js')}}"></script>
 
 
 
@@ -97,8 +97,111 @@ function liveprocessing()
 
 }
 
+function Updatepassword()
+{
+  
+  $("#curent").hide();
+  $("#editprofile").hide();
+  document.getElementById("updatepassword").style.display = 'block';
+  $("#updatepassword").show();
 
 
+}
+
+function Updateprofile()
+{
+
+  $("#curent").hide();
+  $("#updatepassword").hide();
+  document.getElementById("editprofile").style.display = 'block';
+  $("#editprofile").show();
+
+}
+
+function EditPro()
+{
+
+  var state = `
+  
+  <div class="col-sm-4 form-group col-xs-12 col-sm-6">
+			<label><b>State &nbsp;<span style="color: red;">*</span></b></label>
+			<select id="firstlist" onclick="selct_district(this.value)" name="state" class="form-control" required >
+			<option value ="">--Select State--</option>
+			<option value ="Andhra Pradesh">Andhra Pradesh</option>
+			<option value ="Arunachal Pradesh">Arunachal Pradesh</option>
+			<option value ="Assam">Assam</option>
+			<option value ="Bihar">Bihar</option>
+			<option value ="Chhattisgarh">Chhattisgarh</option>
+			<option value ="Dadra and Nagar Haveli">Dadra and Nagar Haveli</option>
+			<option value ="Daman and Diu">Daman and Diu</option>
+			<option value ="Delhi">Delhi</option>
+			<option value ="Goa">Goa</option>
+			<option value ="Gujarat">Gujarat</option>
+			<option value ="Haryana">Haryana</option>
+			<option value ="Himachal Pradesh">Himachal Pradesh</option>
+			<option value ="Jammu and Kashmir">Jammu and Kashmir</option>
+			<option value ="Jharkhand">Jharkhand</option>
+			<option value ="Karnataka">Karnataka</option>
+			<option value ="Kerala">Kerala</option>
+			<option value ="Madhya Pradesh">Madhya Pradesh</option>
+			<option value ="Maharashtra">Maharashtra</option>
+			<option value ="Manipur">Manipur</option>
+			<option value ="Meghalaya">Meghalaya</option>
+			<option value ="Mizoram">Mizoram</option>
+			<option value ="Nagaland">Nagaland</option>
+			<option value ="Orissa">Orissa</option>
+			<option value ="Puducherry">Puducherry</option>
+			<option value ="Punjab">Punjab</option>
+			<option value ="Rajasthan">Rajasthan</option>
+			<option value ="Sikkim">Sikkim</option>
+			<option value ="Tamil Nadu">Tamil Nadu</option>
+			<option value ="Telangana">Telangana</option>
+			<option value ="Tripura">Tripura</option>
+			<option value ="Uttar Pradesh">Uttar Pradesh</option>
+			<option value ="Uttarakhand">Uttarakhand</option>
+			<option value ="West Bengal">West Bengal</option>
+			</select>
+			</div>	
+		
+
+  
+  `;
+
+  var city = `
+  <div class="col-sm-4 form-group col-xs-12 col-sm-6 ">
+			<label><b>City &nbsp;<span style="color: red;">*</span></b></label>
+			<select id='secondlist' name="city" class="form-control" required >
+			<option value="">--Select City--</option>
+			</select>
+  `
+
+
+
+
+
+  document.getElementById("fname").readOnly = false;
+  document.getElementById("lname").readOnly = false;
+  document.getElementById("uname").readOnly = false;
+  document.getElementById("mobile").readOnly = false;
+  document.getElementById("email").readOnly = false;
+  document.getElementById("zip").readOnly = false;
+  document.getElementById("address").readOnly = false;
+
+  document.getElementById("fname").required = true;
+  document.getElementById("lname").required = true;
+  document.getElementById("uname").required = true;
+  document.getElementById("mobile").required = true;
+  document.getElementById("email").required = true;
+  document.getElementById("zip").required = true;
+  document.getElementById("address").required = true;
+
+
+  $("#statediv").replaceWith(state)
+  $("#citydiv").replaceWith(city)
+
+  document.getElementById("firstlist").required = true;
+  document.getElementById("secondlist").required = true;
+}
 
 
 function hidepreview()
@@ -124,15 +227,26 @@ function hidepreview()
 {% block navbar %}
       <nav id="nav-menu-container">
         <ul class="nav-menu pull-right">
-         <span style="color: white;">Username </span><li class="menu-active"></li><a href="#"><b>Logout</b></a></li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret">USERNAME </span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#editprofile" onclick="Updateprofile()">Edit Profile</a>
+              </li>
+              <li><a href="#updatepassword" onclick="Updatepassword()">Change Password</a>
+              </li>
+              <li><a href="/logout">Logout</a>
+              </li>
+            </ul>
+          </li>
         </ul>
       </nav>
 {% endblock %}
 
       {% block body %} 
 
+
       <div class="container" id="curent" style="margin-top: 100px;border-color:#2dc997; border-radius: 10px; margin-bottom: 30px; border-style: solid; max-width: 90%; min-width: 300px;">
-      <form action="/upload" method="POST" enctype="multipart/form-data" id="videocheck" >
+      <form action="/user/upload" method="POST" enctype="multipart/form-data" id="videocheck" >
         
           
             {% with messages = get_flashed_messages() %}
@@ -147,6 +261,15 @@ function hidepreview()
               {% endfor %}
             {% endif %}
           {% endwith %}
+
+          {% if third == "third" %}
+     
+          <div class="alert alert-danger alert-dismissible fade show" style="max-width: 50%;">
+            <strong>Error!</strong> No Department Or Location for Requesting Video
+          </div>
+           
+          {% endif %}
+
               <div class="row">
                 <label class="control-label"></label>
                       <div style="margin: 20px;"><b>Upload File</b></div>
@@ -261,9 +384,180 @@ function hidepreview()
   </div>
   
 
+  <div  id="updatepassword"style="display: none;" >
 
+    <div class="container-fluid" style="margin-top: 100px; margin-bottom: 100px;padding: 2%; border-style: solid;
+  border-color:#2dc997; border-radius: 7%; max-width: 650px;background-color: aliceblue;">
+  <h2 style="text-align: center;font-weight: bold;"id ="login">UPDATE PASSWORD </h2>
+  <center>
+  
+  <div class="container"> 
+  <form action="/user/update/password" id ="update" method ="POST">
+  <div class="col-xs-12 col-sm-6 col-md-9"> 
+  <br>
+  <div class="form-group">
+    <input class="form-control" style="color: black;" type="password" placeholder="Enter the current Password" id ="psw1" name="psw1"  pattern="[0-9a-zA-Z].{8,}" maxlength="12" title="It includes  numbers , uppercase,lowercase letter, and at least 8 or more characters required (Max length:12)" required >
+  </div>
+  
+  <div class="form-group">
+    <input class="form-control" style="color: black;" type="password" placeholder="Enter the new Password" id ="psw2" name="psw2"  pattern="[0-9a-zA-Z].{8,}" maxlength="12" title="It includes  numbers , uppercase,lowercase letter, and at least 8 or more characters required (Max length:12)" required >
+  </div>
+  <div class="form-group">
+    <input class="form-control" style="color: black;" type="password" placeholder="Re-type the new Password" id ="psw3" name="psw3  pattern="[0-9a-zA-Z].{8,}" maxlength="12" title="It includes  numbers , uppercase,lowercase letter, and at least 8 or more characters required (Max length:12)" required >
+  </div>
+  
+  <button class="btn btn-primary" type="submit" id="updatepassword" style="background-color:#2dc997;" >Update</button><br>
+  <a href="/user/current"class="btn btn-danger" type="submit">Back</a>
+  <br>
+  </div>
+  </form>
+  </div>
+  </center> 
+  </div>
+  </div>
     
     <!---->
+
+
+
+
+
+    <div align="center" id ="editprofile" class="container-fluid" style="display: none;margin-top: 100px; margin-bottom: 100px;padding: 2%; border-style: solid;
+    border-color:#2dc997; border-radius: 7%; max-width: 1000px;">
+    <h2 style="text-align: center;font-weight: bold;"id ="login">Edit Profile </h2>
+      <form action ="/user/update/profile" method ="POST">
+        <div class="col-lg-12 ">
+        <div class=" col-xs-12 col-sm-6 col-md-9">
+
+            {% if id == 'Ordinary' %}
+              
+              <div class="row">
+              <div class="col-xs-12 col-sm-6 form-group">
+              <label><b>First Name &nbsp;<span style="color: red;">*</span></b></label>
+              <input type="text" id="fname" name="fname" placeholder="Enter First Name" class="form-control" readonly value="{{profile.fname}}" pattern="([a-zA-Z]*)" title="It contains alphabets only"   />
+              </div>
+        
+              <div class="col-xs-12 col-sm-6 form-group">
+              <label><b>Last Name &nbsp;<span style="color: red;">*</span></b></label>
+              <input type="text" id="lname" name="lname" placeholder="Enter Last Name" class="form-control" readonly value="{{profile.lname}}" pattern="([a-zA-Z]*)" title="It contains alphabets only"  />
+              </div>
+              </div>					
+        
+        
+              <div class="row">
+              <div class="col-xs-12 col-sm-6 col-md-9 form-group">
+              <label><b>User Name &nbsp;<span style="color: red;">*</span></b></label>
+              <input type="text" id="uname" name="username" placeholder="Enter User Name " class="form-control" readonly value="{{profile.usr_name}}" pattern="([0-9a-zA-Z]*)" title="It contain letters and numbers only" />
+              </div>
+              </div>
+              
+              
+          
+              <div class="row">					
+              <div class="col-sm-4 form-group col-xs-12 col-sm-6 ">
+              <label><b>Mobile Number &nbsp;<span style="color: red;">*</span></b></label>
+              <input type="tel" id ="mobile" name="mobile" placeholder="Enter Mobile Number *" class="form-control" readonly value="{{profile.phone}}"  maxlength="10" pattern="[0-9]{10}" title="10 digit number"  />	</div>
+        
+        
+              <div class="form-group col-sm-4 col-xs-12 col-sm-6 ">
+              <label><b>Email Address &nbsp;<span style="color: red;">*</span></b></label>
+              <input type="email" id="email" name="email" placeholder="Enter Email Address *" class="form-control" readonly value="{{profile.mail}}" title="Valid email address" />
+              </div>	
+        
+              </div>
+        
+              <div class = "row">
+              <div class="form-group col-xs-12 col-sm-6">
+              <label><b>Address &nbsp;<span style="color: red;">*</span></b></label>
+              <textarea placeholder="Enter Address Here.." name="address" id="address" rows="3" class="form-control"readonly >{{profile.address}}</textarea>
+              </div>	
+              
+
+              <div id="statediv" class="form-group col-sm-4 col-xs-12 col-sm-6 ">
+              <label><b>State&nbsp;<span style="color: red;">*</span></b></label>
+              <input type="text"id="state"  class="form-control" readonly value="{{profile.state}}"/>
+              </div>
+              </div>
+        
+              <div class = "row">
+              <div id="citydiv" class="form-group col-sm-4 col-xs-12 col-sm-6 ">
+              <label><b>city&nbsp;<span style="color: red;">*</span></b></label>
+              <input type="text" id="city" class="form-control" readonly value="{{profile.city}}" />
+              </div>
+        
+        
+              <div class="col-sm-4 form-group col-xs-12 col-sm-6 ">
+              <label><b>Zip &nbsp;<span style="color: red;">*</span></b></label>
+              <input type="text" id="zip" name="zip" placeholder="Enter Zip Code Here.." class="form-control"readonly value="{{profile.zip}}" pattern="[0-9]{6}" title="It contains 6 digits only" maxlength="6" />
+              </div>
+              </div>		
+                  
+              {% else %}
+              
+              <div class="row">
+                <div class="col-xs-12 col-sm-6 form-group">
+                  <label><b>First Name &nbsp;<span style="color: red;">*</span></b></label>
+                  <input type="text" placeholder="Enter First Name" class="form-control" value="{{profile.fname}}" pattern="([a-zA-Z]*)" title="It contains alphabets only" readonly required />
+                </div>
+                <div class="col-xs-12 col-sm-6 form-group">
+                  <label><b>Last Name &nbsp;<span style="color: red;">*</span></b></label>
+                  <input type="text" placeholder="Enter Last Name" class="form-control" value="{{profile.fname}}" pattern="([a-zA-Z]*)" title="It contains alphabets only" readonly  required />
+                </div>
+                </div>			
+                <div class="row">
     
+                <div class="col-xs-12 col-sm-6 col-md-9 form-group">
+                <label><b>User Name &nbsp;<span style="color: red;">*</span></b></label>
+                <input type="text" placeholder="Enter User Name " class="form-control" value="{{profile.usr_name}}" pattern="([0-9a-zA-Z]*)" title="It contain letters and numbers only" readonly  required />
+                </div>
+                </div>
+    
+                <div class="row">					
+                <div class="col-sm-4 form-group col-xs-12 col-sm-6 ">
+                <label><b>Mobile Number &nbsp;<span style="color: red;">*</span></b></label>
+                <input type="tel" placeholder="Enter Mobile Number *" class="form-control" value="{{profile.phone}}"  maxlength="10" pattern="[0-9]{10}" title="10 digit number" readonly required >	</div>
+    
+    
+                <div class="form-group col-sm-4 col-xs-12 col-sm-6 ">
+                <label><b>Email Address &nbsp;<span style="color: red;">*</span></b></label>
+                <input type="email" placeholder="Enter Email Address *" value="{{profile.mail}}" class="form-control" readonly required>
+                </div>	
+                </div>
+    
+                <div class="row">
+                <div class="form-group col-sm-4 col-xs-12 col-sm-6">
+                <label for="job">Job Title:</label>&nbsp;
+    
+                <select id="job" required>
+                  <option class="dropdown-item" value="">--select option--</option>
+                  <option class="dropdown-item" value="Police">Police Force</option>
+                  <option class="dropdown-item" value="RPF">RPF</option>
+                  <option class="dropdown-item" value="Others">Others</option>
+                
+                </select>
+                </div>
+
+              {%endif%}
+            </div>
+          </div>
+        
+                  <br>
+                 
+                   
+                    
+                    
+                    <a type="button" href="#editprofile" onclick="EditPro()" id ="edit" class="btn btn-primary">EDIT</a><br>
+                    <button type="submit" id ="save" style=" background-color:#2dc997;max-width: 20%;" class="btn btn-primary">SAVE</button>
+                    <a type="button" href="/user/current" id ="back2"class="btn btn-danger">Back</a><br>
+                    
+                  </form>
+      </div>
+      
+      
+    
+
+
+
+
     {% endblock %}
 

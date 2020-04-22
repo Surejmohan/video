@@ -57,8 +57,9 @@ function resetthird() {
   $("#up2").show();
   $("#up3").show();
   $("#third").hide();
-  $("#mass").hide();
+  $("#video").hide();
   $("#live").hide();
+  document.getElementById("third").style.display = 'none';
   document.getElementById("firstList").required = false;
  
 }
@@ -69,8 +70,8 @@ function resetlive() {
   $("#up2").show();
   $("#up3").show();
   $("#third").hide();
-  $("#mass").hide();
   $("#live").hide();
+  $("#video").hide();
 }
 
 
@@ -112,6 +113,7 @@ htm = `
 </div>
 `
 document.getElementById("video").innerHTML= htm; 
+document.getElementById("third").style.display = 'none';
 
 }
 
@@ -155,6 +157,7 @@ function live()
   
   `
   document.getElementById("live").innerHTML= htm;
+  document.getElementById("third").style.display = 'none';
 }
 
 
@@ -165,6 +168,7 @@ function third()
 {
 document.getElementById("third").style.display = 'block';
 document.getElementById("firstList").required = true;
+
 
 
 }

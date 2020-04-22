@@ -490,7 +490,7 @@ def current():
     for al in all:
         print(all.index(al))
 
-    id = User.query.filter_by(username = 'rajkumar123').first()
+    id = User.query.filter_by(username = 'vidhya1998').first()
     id2 = id.type
     print(id2)
     if(id.type == "Ordinary"):
@@ -498,7 +498,7 @@ def current():
         print(pro)
 
     if(id.type == "Authority"):
-        pro = Authority.query.filter_by(usr_name = 'rajkumar123').first()
+        pro = Authority.query.filter_by(usr_name = 'vidhya1998').first()
 
     
     if all == []:
@@ -518,16 +518,99 @@ def output():
 def profileupdate():
 
      if request.method == 'POST':
-         fname = request.form['fname']
-         lname = request.form['lname']
+         typeid = request.form['id']
+         if typeid == "Ordinary":
+             print(typeid)
+             fname = request.form['fname']
+             lname = request.form['lname']
+             mobile = request.form['mobile']
+             email = request.form['email']
+             address = request.form['address']
+             state = request.form['state']
+             city = request.form['city']
+             zip = request.form['zip']
+             
+            
+
+             ordi = Ordinary.query.filter_by(usr_name = 'Surejmohan').first()
+             ordi.fname = fname
+             ordi.lname = lname
+             ordi.phone = mobile
+             ordi.mail = email
+             ordi.address = address
+             if state != "":
+                 ordi.state = state
+                 ordi.city = city
+             ordi.zip = zip
+
+             db.session.add(ordi)
+             db.session.commit()
+             flash("Successfully Updated Your Profile",'success')
+             return redirect(url_for('current'))
+
+            
 
 
-         return ""
+         elif typeid == "Authority":
+             print(typeid)
+             fname = request.form['fname']
+             lname = request.form['lname']
+             mobile = request.form['mobile']
+             email = request.form['email']
+             job = request.form['job']
+             department = request.form['department']
+             
+
+             auth = Authority.query.filter_by(usr_name = 'vidhya1998').first()
+             auth.fname = fname
+             auth.lname = lname
+             auth.phone = mobile
+             auth.mail = email
+             
+             if job != "":
+                if job == "Other":
+                    job = department
+                    auth.job = job
+                else:
+                    auth.job = job
+            
+             print(department)
+
+             db.session.add(auth)
+             db.session.commit()
+             flash("Successfully Updated Your Profile",'success')
+             return redirect(url_for('current'))
+
+         
+
+
+         return typeid
 
 
 
 @app.route('/user/update/password', methods=['POST'])
 def passwordupdate():
+
+     if request.method == 'POST':
+        currentpass = request.form['psw1']
+        newpassword = request.form['psw2']
+
+        user = User.query.filter_by(username = 'vidhya1998',password = currentpass).first()
+        if user:
+            user.password = newpassword
+            db.session.add(user)
+            db.session.commit()
+            flash("Successfully Changed Password",'success')
+        else:
+            flash("You Entered Wrong Password",'error')
+
+        return redirect(url_for('current'))
+
+
+
+
+@app.route('/user/update/username', methods=['POST'])
+def usernameupdate():
     return ""
 
 
@@ -555,7 +638,7 @@ def train():
                 filename = secure_filename(f.filename)
                 f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             else:
-                flash("Invalid Input File Format; only jpeg or jpg supported")
+                flash("Invalid Input File Format; only jpeg or jpg supported",'error')
                 print("Invalid Input File Format; only jpeg or jpg supported")
                 return redirect(url_for('current'))
         
@@ -569,7 +652,7 @@ def train():
                 myimages.append(files)
         no_of_images = len(myimages)
         if no_of_images > 2:
-            flash('Maximum Number of Images is 2')
+            flash('Maximum Number of Images is 2','error')
             print("Maximum Number of Images is 2 ")
             filelist = [f for f in os.listdir('uploads/')]
             for f in filelist:
@@ -587,7 +670,7 @@ def train():
             img_bgr = cv2.imread(paths[i])
             image = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
             if len(detector(image, 1)) > 1 :
-                flash('Please change image: ' + myimages[i] + ' - it has ' + str(len(detector(image, 1))) + "faces")
+                flash('Please change image: ' + myimages[i] + ' - it has ' + str(len(detector(image, 1))) + " faces",'error')
                 print("Please change image: " + myimages[i] + " - it has " + str(len(detector(image, 1))) + " faces; it can only have one")
                 return redirect(url_for('current'))
 
@@ -646,7 +729,7 @@ def train():
             f = videos[0]
             if len(videos) == 1 :
                     if not allowed_file2(f.filename):
-                        flash('Invalid Video Format ;Only Mp4 Supported')
+                        flash('Invalid Video Format ;Only Mp4 Supported','error')
                         print("Invalid Video Format ;Only Mp4 Supported")
                         return redirect(url_for('current'))
                     filename = secure_filename(f.filename)
@@ -655,7 +738,7 @@ def train():
                     print(video_path)
                     cap = cv2.VideoCapture(video_path)
                     if not cap.isOpened():
-                        flash('Video cannot Open')
+                        flash('Video cannot Open','error')
                         print("Video cannot Open")
                         return redirect(url_for('current'))
         
@@ -709,7 +792,7 @@ def train():
                     return render_template('output.html',success = success, time = time)
 
             else:
-                flash('Only one video can upload')
+                flash('Only one video can upload','error')
                 print("Only one video can upload")
                 return redirect(url_for('current'))
 
@@ -724,7 +807,7 @@ def train():
             
             cap = cv2.VideoCapture(0)
             if not cap.isOpened():
-                flash('Camera is not working')
+                flash('Camera is not working','error')
                 print("Camera is not working")
                 return redirect(url_for('current'))
         

@@ -292,6 +292,21 @@ var check = function() {
   }
 
 
+
+
+  var check2 = function() {
+	if (document.getElementById('user2').value ==
+	  document.getElementById('user3').value) {
+	  document.getElementById('message2').style.color = 'green';
+	  document.getElementById('message2').innerHTML = 'matching';
+	} else {
+	  document.getElementById('message2').style.color = 'red';
+	  document.getElementById('message2').innerHTML = 'not matching';
+	}
+  }
+
+
+
 function showfield(name)
 {
     if(name=='Other'){
@@ -304,13 +319,18 @@ function showfield(name)
 	}
 }
 
-function validate()
-{
- if (check == 1)
- {
-  passwordup.submit();
- }
-}
+
+$(function () {
+  $('#updatepsw').click(function () {
+    var pass = $('#psw2').val();
+    var conf = $('#psw3').val();
+    if (pass != conf) {
+      alert("Password do not match");
+      return false;
+    }
+    return true;
+  });
+});
 
 
 
@@ -527,10 +547,11 @@ function hidepreview()
   </div>
   
   <div class="form-group">
-    <input class="form-control" style="color: black;" type="text" placeholder="Enter the new Username" id ="user2" name="username2"  required >
+    <input class="form-control" style="color: black;" onkeyup="check2();" type="text" placeholder="Enter the new Username" id ="user2" name="username2"  required >
   </div>
   <div class="form-group">
-    <input class="form-control" style="color: black;" type="text" placeholder="Re-type the new Username" id ="user3" name="username3"   required >
+    <input class="form-control" style="color: black;" onkeyup="check2();" type="text" placeholder="Re-type the new Username" id ="user3" name="username3"   required >
+    <span id='message2'></span>
   </div>
   
   <button class="btn btn-primary" type="submit" id="updateusername" style="background-color:#2dc997;max-width: 90px;" ><b>UPDATE</b></button>
@@ -575,7 +596,7 @@ function hidepreview()
     <span id='message'></span>
   </div>
   
-  <button class="btn btn-primary" type="submit" id="updatepassword" style="background-color:#2dc997;max-width: 90px;" onclick="validate()" ><b>UPDATE</b></button>
+  <button class="btn btn-primary" type="submit" id="updatepsw" style="background-color:#2dc997;max-width: 90px;" ><b>UPDATE</b></button>
   <a href="/user/current"class="btn btn-danger" type="submit"><b>BACK</b></a>
   <br>
   </div>
@@ -592,7 +613,7 @@ function hidepreview()
     <div  id="deleteaccount"style="display: none;" >
 
       <div class="container-fluid" style="margin-top: 100px; margin-bottom: 100px;padding: 2%; max-width: 800px;">
-    <form action="" method="POST"  >
+    <form action="/user/deleteaccount" method="POST"  >
      
       <div class="alert alert-warning alert-dismissible fade show" style="max-width: 100%;border-radius: 5%;">
         <strong>Are you Sure ?</strong> <br>

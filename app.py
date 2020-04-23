@@ -490,11 +490,11 @@ def current():
     for al in all:
         print(all.index(al))
 
-    id = User.query.filter_by(username = 'vidhya1998').first()
+    id = User.query.filter_by(username = 'Surejmohan12').first()
     id2 = id.type
     print(id2)
     if(id.type == "Ordinary"):
-        pro = Ordinary.query.filter_by(usr_name = 'Surejmohan').first()
+        pro = Ordinary.query.filter_by(usr_name = 'Surejmohan12').first()
         print(pro)
 
     if(id.type == "Authority"):
@@ -532,7 +532,7 @@ def profileupdate():
              
             
 
-             ordi = Ordinary.query.filter_by(usr_name = 'Surejmohan').first()
+             ordi = Ordinary.query.filter_by(usr_name = 'Surejmohan12').first()
              ordi.fname = fname
              ordi.lname = lname
              ordi.phone = mobile
@@ -594,24 +594,130 @@ def passwordupdate():
      if request.method == 'POST':
         currentpass = request.form['psw1']
         newpassword = request.form['psw2']
+        confpassword = request.form['psw3']
 
-        user = User.query.filter_by(username = 'vidhya1998',password = currentpass).first()
-        if user:
-            user.password = newpassword
-            db.session.add(user)
-            db.session.commit()
-            flash("Successfully Changed Password",'success')
+        if newpassword == confpassword:
+            user = User.query.filter_by(username = 'Surejmohan12',password = currentpass).first()
+            if user:
+                if user.password == newpassword:
+                    flash("You have Entered same Password, Try some other",'error')
+                else:
+                    user.password = newpassword
+                    db.session.add(user)
+                    db.session.commit()
+                    flash("Successfully Changed Password",'success')
+            else:
+                flash("You Entered Wrong Password",'error')
+
         else:
-            flash("You Entered Wrong Password",'error')
-
+            flash("New password is not matching",'error')
+        
         return redirect(url_for('current'))
+
+
 
 
 
 
 @app.route('/user/update/username', methods=['POST'])
 def usernameupdate():
-    return ""
+
+    if request.method == 'POST':
+        currentuser = request.form['username1']
+        newuser = request.form['username2']
+        confuser = request.form['username3']
+
+        if newuser == confuser:
+          if currentuser == 'Surejmohan12':
+            user = User.query.filter_by(username = currentuser).first()
+            if user:
+              if User.query.filter_by(username = newuser).first():
+                  flash("New Username Already exist, Try some other",'error')
+                  return redirect(url_for('current'))
+              else:
+                if user.username == newuser:
+                    flash("You have Entered same Username, Try some other",'error')
+                    return redirect(url_for('current'))
+                else:
+                    if user.type == "Ordinary":
+                        ord = Ordinary.query.filter_by(usr_name = currentuser).first()
+                        oth = Other.query.filter_by(usr_name = currentuser).first()
+                        ord.usr_name = newuser
+                        oth.usr_name = newuser
+                        user.username = newuser
+                        db.session.add(user)
+                        db.session.add(ord)
+                        db.session.add(oth)
+                        db.session.commit()
+                    
+                    if user.type == "Authority":
+                        auth = Authority.query.filter_by(usr_name = currentuser).first()
+                        oth = Other.query.filter_by(usr_name = currentuser).first()
+                        auth.usr_name = newuser
+                        oth.usr_name = newuser
+                        user.username = newuser
+                        db.session.add(user)
+                        db.session.add(auth)
+                        db.session.add(oth)
+                        db.session.commit()
+                    
+                    
+                    flash("Successfully Changed Username",'success')
+                    return redirect(url_for('current'))
+            else:
+                flash("You Entered Wrong Username",'error')
+                return redirect(url_for('current'))
+          else:
+              flash("You Entered Wrong Username",'error')
+              return redirect(url_for('current'))
+
+        else:
+            flash("New Username is not matching",'error')
+            return redirect(url_for('current'))
+        
+        
+    
+
+@app.route('/user/deleteaccount', methods=['POST'])
+def delete():
+
+    if request.method == 'POST':
+        password = request.form['password']
+        user = User.query.filter_by(username ='Surejmohan12',password = password ).first()
+        if user:
+            delete1 = db.session.query(User).filter(User.username == 'Surejmohan12').first()
+
+            if user.type == "Ordinary":
+                delete2 = Ordinary.query.filter(Ordinary.usr_name =='Surejmohan12').first()
+                delete3 = Other.query.filter(Other.usr_name == 'Surejmohan12').first()
+                count = Count.query.filter(Count.id == 1).first()
+                count.Ordinary = count.Ordinary -1
+
+            elif user.type == "Authority":
+                delete2 = Authority.query.filter(Authority.usr_name == 'Surejmohan12').first()
+                delete3 = Other.query.filter(Other.usr_name == 'Surejmohan12').first()
+                count = Count.query.filter(Count.id == 1).first()
+                count.Ordinary = count.Ordinary -1
+        
+            db.session.add(count)
+            db.session.delete(delete1)
+            db.session.delete(delete2)
+            db.session.delete(delete3)
+            db.session.commit()
+
+            flash("You have Successfully Deleted Your Account",'success')
+            return redirect(url_for('index'))
+        
+        else: 
+            flash("You have entered Wrong Password",'error')
+            return redirect(url_for('current'))
+        
+
+
+
+
+
+        return ""
 
 
 

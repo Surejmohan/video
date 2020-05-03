@@ -86,18 +86,19 @@
 
 <div class="container-fluid" style="margin-top: 100px; margin-bottom: 100px;padding: 2%; border-style: solid;
 border-color:#2dc997; border-radius: 7%; max-width: 650px;">
+<form action="/login" method="POST">
   <h2 style="text-align: center;font-weight: bold;"id ="login">LOGIN </h2>
  <center>
   
   <div class="container">
     <form action="" id ="signin" method ="POST" onsubmit="javascript:codevalidate(); return false;">
     <div class="col-xs-12 col-sm-6 col-md-9 ">
-    <input type="text" placeholder="Enter Username" name="uname" id="username" pattern="([0-9a-zA-Z]*)" title="It contain letters and numbers only"  required>
+    <input type="text" placeholder="Enter Username" name="uname" id="uname" title="It contain letters and numbers only"  required>
     
 
     
     <br>
-    <input type="password" placeholder="Enter Password" id ="psw" name="psw"  pattern="[0-9a-zA-Z].{8,}" maxlength="12" title="It includes  numbers , uppercase,lowercase letter, and at least 8 or more characters required (Max length:12)" required >
+    <input type="password" placeholder="Enter Password" id ="psw" name="psw"  pattern="[0-9a-zA-Z].{8,}" title="It includes  numbers , uppercase,lowercase letter, and at least 8 or more characters required (Max length:12)" required >
     
     <div class="g-recaptcha" data-theme="light" data-sitekey="6LeS0eEUAAAAAAPvV-ivUDw37ZWfgorEXqNYDMSj" style="transform:scale(0.77);-webkit-transform:scale(0.77);transform-origin:0 0;-webkit-transform-origin:0 0;" ></div>
     <br>
@@ -114,19 +115,50 @@ border-color:#2dc997; border-radius: 7%; max-width: 650px;">
   </div><br>
   <p style="float: left;"><label>Don't Have an account</label>&nbsp;&nbsp;<a style = "text-decoration: none; color: white;background-color: #2dc997;"type="submit" data-toggle="modal" data-target="#modalLRForm"  class = "btn">Click Here</a></p><br>
 </center> <br><br>
+</form>
 </div>
 
- </div>
-
-</div>
   
     <!-- #login -->
 
   
-						
+    <script type="text/javascript">
+      window.setTimeout("document.getElementById('Message').style.display='none';", 8000); </script>					
 <!-- Reg form -->
+
+
 <div id = "register">
+  <div id = "relogin">
+    {% if scroll %}
+    <div class="container mt-3" id="Message">
+      {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            {% if category=='success' %}
+              <div class="alert alert-success mb-3" role="alert" >
+                {{message}}
+              </div>
+            {% endif %}
+            
+            {% if category=='error' %}
+              <div class="alert alert-danger mb-3" role="alert" >
+                {{message}}
+              </div>
+            {% endif %}
+          
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
 </div>
+    <script>
+        document.getElementById('{{ scroll }}').scrollIntoView();
+        // or
+        document.location.hash = '#' + '{{ scroll }}';
+    </script>
+    {% endif %}
+</div>
+</div>
+
   <!--Regform -->
 
 

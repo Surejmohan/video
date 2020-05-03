@@ -26,12 +26,13 @@
 }
 
 .offline-doc .navbar.navbar-transparent .navbar-minimize {
-  display: none;
+  display: block;
 }
 
 .offline-doc .navbar.navbar-transparent .navbar-brand,
 .offline-doc .navbar.navbar-transparent .collapse .navbar-nav .nav-link {
   color: #FFF;
+  
 }
 
 .offline-doc .footer {
@@ -106,7 +107,6 @@
 
 
 
-
 #map {
   z-index: 2;
   height: calc(100vh - 70px);
@@ -123,4 +123,7 @@
 
 .bd-docs.dark-edition {
   background-color: #fff;
+}
+.bs-example{
+  margin: 20px;
 }

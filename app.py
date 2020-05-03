@@ -1,14 +1,21 @@
 #import libraries
 
-from flask import Flask, render_template,request,redirect,url_for
+from flask import Flask,render_template,flash,redirect,url_for,session,logging,request,Response
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
+from flask_wtf import FlaskForm 
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
+from random import seed
+from random import randint
 import dlib,cv2
 import numpy as np
 import os
 from flask.helpers import flash, get_flashed_messages, send_from_directory
-from flask import url_for,session,logging,request
-from _datetime import datetime
-from flask_sqlalchemy import SQLAlchemy
+from datetime import timedelta
+# seed random number generator
+seed(1)
+# generate some integers
 
 #end
 
@@ -19,18 +26,35 @@ UPLOAD_FOLDER = './uploads'
 UPLOAD_VIDEO = './video'
 DOWNLOAD = './result'
 THIRDVIDEO = './third_video'
+IDPROOF_FOLDER = './ID_Proof'
+
+ALLOWEDID_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 ALLOWED_FILEEXTENSIONS = set(['jpg','jpeg'])
 ALLOWED_VIDEOEXTENSIONS = set(['mp4'])
 
 app = Flask(__name__)
+mail=Mail(app)
+s = URLSafeTimedSerializer('secret')
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['UPLOAD_VIDEO'] = UPLOAD_VIDEO
 app.config['DOWNLOAD'] = DOWNLOAD
 app.config['THIRDVIDEO'] = THIRDVIDEO
+app.config['IDPROOF_FOLDER'] = IDPROOF_FOLDER
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///main.db'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['SECRET_KEY'] = 'secret'
+
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'pinpoint.four.2020@gmail.com'
+app.config['MAIL_PASSWORD'] = 'Google2020'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
+
+app.secret_key = "hello"
 
 #end
 
@@ -140,9 +164,9 @@ class Other(db.Model):
     admin_id =  db.Column(db.String(20))
     no_of_video_upload = db.Column(db.Integer)
     no_of_video_request = db.Column(db.Integer)
-    third_party_issue_id = db.Column(db.Integer)
+    third_party_issue_id = db.Column(db.String(20)) 
     third_party_pending_order = db.Column(db.String(10))
-    third_party_response = db.Column(db.String(20))  #video available or not
+    third_party_response = db.Column(db.String(50))  #video available or not
     date= db.Column(db.String(20))
     start_time = db.Column(db.String(20))
     end_time = db.Column(db.String(20))
@@ -271,210 +295,206 @@ def allowed_file2(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_VIDEOEXTENSIONS
 #end
 
+#allowed IDs
+def allowed_file3(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWEDID_EXTENSIONS
+
 #end
 
+#end
 
 
 
 #contollers
 
 
-#Thirdparty Page
 
-@app.route('/thirdparty')
-def  thirddashboard():
-    all = Other.query.filter_by(third_party_issue_id = 'Railway_1',third_party_pending_order = 'no').all()
-    len1 = len(all)
-    if (len1 == 0):
-        value = 'None'
-        flash("You do not have any Request")
-        return render_template('newthird.html',all=all,value = value)
+#INdex page
 
-    else:
-        value = 'success'
-        flash("You Have " + str(len1) + " Request")
-        return render_template('newthird.html',all=all,value = value)
+
+@app.route('/')
+def index():
+    #return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
+    return render_template('index.html')
 
 
 
-@app.route('/thirdparty/pendinguser',methods=['POST'])
-def  PendingUser():
 
-        if request.method == 'POST':
+@app.route('/register', methods=['GET','POST'])
+def Register():
+     if request.method == 'POST':
+         fname = request.form['firstname']
+         lname = request.form['lastname']
+         username = request.form['username']
+         password = request.form['password']
+         confpassword = request.form['confpassword']
+         phone = request.form['mobile']
+         email = request.form['mail']
+         address = request.form['address']
+         state = request.form.get('state')
+         city = request.form.get('city')
+         zip = request.form['zipcode']
+         file1 = request.files['idproof']
+         proof = file1.filename
+         exists = User.query.filter_by(username=username).first()
+         if not exists:
+            if(password == confpassword):
+                reg = User(username = username,password = password,type = 'Ordinary')
+                db.session.add(reg)
 
-            file = request.files['video']
-            userid = request.form['userid']
-            username = request.form['username']
-            response = request.form['response']
-            print(file.filename)
-            print(username)
-            if request.form['accept'] == "accept":
+                ord = Ordinary(fname = fname, lname = lname, phone = phone, mail = email, state = state,
+                city = city,proof = proof, address = address, zip = zip, usr_name = username,confirm=0)
+                db.session.add(ord)
 
-                    if not allowed_file2(file.filename):
-                        flash('Invalid Video Format ;Only Mp4 Supported')
-                        print("Invalid Video Format ;Only Mp4 Supported")
-                        category = 'errorvideo'
-                        return render_template('newthird.html',category = category)
-                    file.filename = username + ".mp4"
-                    print(file.filename)
-                    filename = secure_filename(file.filename)
-                    file.save(os.path.join(app.config['THIRDVIDEO'], filename))
-                    ord = Other.query.filter_by(id = userid).first()
-                    ord.third_party_pending_order = 'yes'
-                    ord.third_party_response = response
-                    db.session.add(ord)
-                    db.session.commit()
-                    category = 'success1'
-                    flash("You have successfully submit Video")
-                    return render_template('newthird.html',category = category)
-            elif request.form['accept'] == "reject":
-                    ord = Other.query.filter_by(id = userid).first()
-                    ord.third_party_pending_order = 'reject'
-                    ord.third_party_response = response
-                    db.session.add(ord)
-                    db.session.commit()
-                    category = 'success2'
-                    flash("You have successfully  Sent your Response ")
-                    return render_template('newthird.html',category = category)
-
-            
-
-
-@app.route('/thirdparty/realtimevideo',methods=['POST'])
-def  reatimevideo():
-
-    filelist = [f for f in os.listdir('uploads/')]
-    for f in filelist:
-        os.remove(os.path.join('uploads/', f))
-
-    if request.method == 'POST':
-        
-        uploaded_files = request.files.getlist("livefile")
-        for f in uploaded_files:
-            if f and allowed_file1(f.filename):
-                filename = secure_filename(f.filename)
-                f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            else:
-                flash("Invalid Input File Format; only jpeg or jpg supported")
-                print("Invalid Input File Format; only jpeg or jpg supported")
-                category = 'errorimage'
-                return render_template('newthird.html',category = category)
-        
-        myimages = []
-        dirfiles = os.listdir('uploads/')
-        sorted(dirfiles)
-        for files in dirfiles:
-            if '.jpg' in files:
-                myimages.append(files)
-            if '.jpeg' in files:
-                myimages.append(files)
-        no_of_images = len(myimages)
-        if no_of_images > 2:
-            flash('Maximum Number of Images is 2')
-            print("Maximum Number of Images is 2 ")
-            filelist = [f for f in os.listdir('uploads/')]
-            for f in filelist:
-                os.remove(os.path.join('uploads/', f))
-            category = 'errornumber'
-            return render_template('newthird.html',category = category)
-
-
-        names = [x[:-4] for x in myimages]
-        paths = ['uploads/' + x for x in myimages]
-        print(names) 
-    
-        descs = {}
-
-        for i in range(0,no_of_images):    
-            img_bgr = cv2.imread(paths[i])
-            image = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-            if len(detector(image, 1)) > 1 :
-                flash('Please change image: ' + myimages[i] + ' - it has ' + str(len(detector(image, 1))) + " faces")
-                print("Please change image: " + myimages[i] + " - it has " + str(len(detector(image, 1))) + " faces; it can only have one")
-                category = 'errorface'
-                return render_template('newthird.html',category = category)
-
-            _ ,img_shapes, _ = find_faces(image,myimages[i])
-            descs[i] = encode_faces(image, img_shapes)[0]
-        if request.form['subm'] == 'submit':
-            np.save('train/descs.npy', descs)
-            descs = np.load('train/descs.npy',allow_pickle=True)[()]
-            
-            cap = cv2.VideoCapture(0)
-            if not cap.isOpened():
-                flash('Camera is not working')
-                print("Camera is not working")
-                category = 'errorcamera'
-                return render_template('newthird.html',category = category)
-        
-            _, img_bgr = cap.read()
-            padding_size = 0
-            resized_width = 1360
-            video_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1]))
-            output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
-
-            fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-            writer = cv2.VideoWriter('result/username.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
-            m=-1
-            i=1
-            s=0
-            while True:
-                        
-                ret, img_bgr = cap.read()
-                if not ret:
-                    break
-
-                img_bgr = cv2.resize(img_bgr, video_size)
-                img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-                dets = detector(img_bgr, 1)
-
-                for k, d in enumerate(dets):
-                    shape = sp(img_rgb, d)
-                    face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
-
-                    last_found = {'name': 'unknown', 'dist': 0.48, 'color': (0,0,255)}
-
-                    for name, saved_desc in descs.items():
-                        dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
-
-                        if dist < last_found['dist']:
-                            last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255)}
-                            if m == -1:
-                                s = i
-                                m=0
-                                    
-                    cv2.rectangle(img_bgr, pt1=(d.left(), d.top()), pt2=(d.right(), d.bottom()), color=last_found['color'], thickness=2)
-                    cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
-                i=i+1
-                writer.write(img_bgr)
-                cv2.imshow('img', img_bgr)
-                if cv2.waitKey(1) == ord('q'):
-                    break
-                    
+                other = Other(admin_approval = 'no', admin_id = '', no_of_video_upload = 0, no_of_video_request = 0, 
+                third_party_issue_id = '',third_party_pending_order = '',third_party_response = '', date = '', 
+                start_time = '', end_time = '', live_recording_no = 0,usr_name = username )
+                db.session.add(other)
                 
-            cap.release()
-            writer.release()
-            time = convert(s/24)
-            print(convert(s/24)) 
-            flash("You have successfully Processed the Video")
-            category = 'success3'
-            return render_template('newthird.html',category = category)
+                value = Count.query.filter_by(id = 1).first()
+                value.Ordinary = value.Ordinary + 1
+                db.session.add(value)
+
+                db.session.commit()
+                #confirmation mail
+                token = s.dumps(email, salt='email-confirm')
+
+                msg = Message('Confirm PINPOINT Account', sender = 'pinpoint.four.2020@gmail.com', recipients = [email])
+                link = url_for('confirm_email', token=token, _external=True)
+                msg.html = render_template('base/email.html',link=link)
+                mail.send(msg)
+
+                
+                if file1 and allowed_file3(file1.filename):
+                    filename = secure_filename(file1.filename)
+                    filename = username +'_' + filename 
+                    file1.save(os.path.join(app.config['IDPROOF_FOLDER'], filename))
+                    return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
+            else:
+                flash('Password and Confirm password not matched','error')
+                return render_template('index.html',scroll='re')
+
+
+     else:
+         flash('Username already taken,try somethig else','error')
+         return render_template('index.html',scroll='re')
+             
+
     
+         
+
+@app.route('/confirm_email/<token>')
+def confirm_email(token):
+    try:
+        email = s.loads(token, salt='email-confirm', max_age=172800)
+    except SignatureExpired:
+        return '<h1>The link is expired!</h1>'
+    Ord = Ordinary.query.filter_by(mail=email).first()
+    Ord.confirm = 1
+    db.session.add(Ord)
+    db.session.commit()
+    return '<h1>Your email is verifed!</h1>'
+
+@app.route('/reg_official', methods=['GET','POST'])
+def Register2():
+    if request.method == 'POST':
+        fname = request.form['fname']
+        lname = request.form['lname']
+        username = request.form['uname']
+        password = request.form['password']
+        confpassword = request.form['confpassword']
+        phone = request.form['mobile']
+        email = request.form['email']
+        job = request.form['job']
+        department = request.form['department']
+        file1 = request.files['jobproof']
+        proof = file1.filename
+        if job == 'Other':
+            job = department
+        exists = User.query.filter_by(username=username).first()
+        if not exists:
+            if(password == confpassword):
+                
+                reg = User(username = username,password = password,type = 'Authority')
+                db.session.add(reg)
+
+                Auth = Authority(fname = fname, lname = lname, phone = phone, mail = email, proof = proof, job=job , usr_name = username,confirm=0)
+                db.session.add(Auth)
+
+                other = Other(admin_approval = 'no', admin_id = '', no_of_video_upload = 0, no_of_video_request = 0, 
+                third_party_issue_id = '',third_party_pending_order = '',third_party_response = '', date = '', 
+                start_time = '', end_time = '', live_recording_no = 0, usr_name = username )
+                db.session.add(other)
+                
+                value = Count.query.filter_by(id = 1).first()
+                value.Authority = value.Authority + 1
+                db.session.add(value)
+                
+                db.session.commit()
+                #confirmation mail
+                token = s.dumps(email, salt='email-confirm')
+                msg = Message('Confirm PINPOINT Account', sender = 'pinpoint.four.2020@gmail.com', recipients = [email])
+                link = url_for('confirm_email', token=token, _external=True)
+                msg.html = render_template('base/email.html',link=link)
+                mail.send(msg)
+                
+                if file1 and allowed_file3(file1.filename):
+                    filename = secure_filename(file1.filename)
+                    filename = username +'_' + filename 
+                    file1.save(os.path.join(app.config['IDPROOF_FOLDER'], filename))
+                    return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
+            else:
+                flash('Password and Confirm password not matched','error')
+                return render_template('index.html',scroll='re')
+
+        else:
+            
+            flash('Username already taken,try somethig else','error')
+            return render_template('index.html',scroll='re')
+        
 
 
-    else:
-        print("Error")
-        exit()
+            
+@app.route("/login",methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        session.permanent = True       
+        uname = request.form['uname']
+        passw = request.form['psw']
+        
+        login = User.query.filter_by(username=uname, password=passw).first()
 
+        if login:
+            
+            if login.type == 'Admin':
+                session["admin"] = uname
 
+                return redirect(url_for('admindashboard'))
+
+            elif login.type == 'Ordinary' or login.type == 'Authority':
+                session["user"] = uname
+
+                return redirect(url_for('current'))
+
+            elif login.type == 'Third_party':
+                session["third"] = uname
+                return redirect(url_for('thirddashboard'))
+            else: 
+                return "ll"
+        else:
+            flash('User is Not Registerd','error')
+            return render_template('index.html',scroll='relogin')
+
+            
 #end
-
 
 
 # Current page 
 
 @app.route('/user/current')
 def current():
+  if "user" in session:
     all = db.session.query(Third.dept.distinct()).all()
     print(all)
     
@@ -490,32 +510,40 @@ def current():
     for al in all:
         print(all.index(al))
 
-    id = User.query.filter_by(username = 'Surejmohan12').first()
+    id = User.query.filter_by(username = session["user"]).first()
     id2 = id.type
     print(id2)
     if(id.type == "Ordinary"):
-        pro = Ordinary.query.filter_by(usr_name = 'Surejmohan12').first()
+        pro = Ordinary.query.filter_by(usr_name = session["user"]).first()
         print(pro)
 
     if(id.type == "Authority"):
-        pro = Authority.query.filter_by(usr_name = 'vidhya1998').first()
+        pro = Authority.query.filter_by(usr_name = session["user"]).first()
 
     
     if all == []:
-        return render_template('current.html',third = "third",profile=pro,id = id2)
+        return render_template('base/current.html',third = "third",profile=pro,id = id2,user = session["user"])
 
 
-    return render_template('current.html',all=all,a=a,profile=pro,id = id2)
+    return render_template('base/current.html',all=all,a=a,profile=pro,id = id2,user = session["user"])
+  
+  else:
+      return render_template('index.html',scroll='relogin')
 
 
 
 @app.route('/user/output')
 def output():
-    return render_template('output.html')
+    if "user" in session:
+        return render_template('base/output.html',user = session["user"])
+    else:
+      return render_template('index.html',scroll='relogin')
+
 
 
 @app.route('/user/update/profile', methods=['POST'])
 def profileupdate():
+    if "user" in session:
 
      if request.method == 'POST':
          typeid = request.form['id']
@@ -532,7 +560,7 @@ def profileupdate():
              
             
 
-             ordi = Ordinary.query.filter_by(usr_name = 'Surejmohan12').first()
+             ordi = Ordinary.query.filter_by(usr_name = session["user"]).first()
              ordi.fname = fname
              ordi.lname = lname
              ordi.phone = mobile
@@ -561,7 +589,7 @@ def profileupdate():
              department = request.form['department']
              
 
-             auth = Authority.query.filter_by(usr_name = 'vidhya1998').first()
+             auth = Authority.query.filter_by(usr_name = session["user"]).first()
              auth.fname = fname
              auth.lname = lname
              auth.phone = mobile
@@ -585,11 +613,14 @@ def profileupdate():
 
 
          return typeid
-
+    else:
+      return render_template('index.html',scroll='relogin')
 
 
 @app.route('/user/update/password', methods=['POST'])
 def passwordupdate():
+
+  if "user" in session:
 
      if request.method == 'POST':
         currentpass = request.form['psw1']
@@ -597,7 +628,7 @@ def passwordupdate():
         confpassword = request.form['psw3']
 
         if newpassword == confpassword:
-            user = User.query.filter_by(username = 'Surejmohan12',password = currentpass).first()
+            user = User.query.filter_by(username = session["user"],password = currentpass).first()
             if user:
                 if user.password == newpassword:
                     flash("You have Entered same Password, Try some other",'error')
@@ -613,6 +644,9 @@ def passwordupdate():
             flash("New password is not matching",'error')
         
         return redirect(url_for('current'))
+  
+  else:
+      return render_template('index.html',scroll='relogin')
 
 
 
@@ -622,13 +656,15 @@ def passwordupdate():
 @app.route('/user/update/username', methods=['POST'])
 def usernameupdate():
 
+  if "user" in session:
+
     if request.method == 'POST':
         currentuser = request.form['username1']
         newuser = request.form['username2']
         confuser = request.form['username3']
 
         if newuser == confuser:
-          if currentuser == 'Surejmohan12':
+          if currentuser == session["user"]:
             user = User.query.filter_by(username = currentuser).first()
             if user:
               if User.query.filter_by(username = newuser).first():
@@ -674,28 +710,32 @@ def usernameupdate():
         else:
             flash("New Username is not matching",'error')
             return redirect(url_for('current'))
-        
+
+  else:
+      return render_template('index.html',scroll='relogin')      
         
     
 
 @app.route('/user/deleteaccount', methods=['POST'])
 def delete():
 
+  if "user" in session:
+
     if request.method == 'POST':
         password = request.form['password']
-        user = User.query.filter_by(username ='Surejmohan12',password = password ).first()
+        user = User.query.filter_by(username = session["user"],password = password ).first()
         if user:
-            delete1 = db.session.query(User).filter(User.username == 'Surejmohan12').first()
+            delete1 = db.session.query(User).filter(User.username == session["user"]).first()
 
             if user.type == "Ordinary":
-                delete2 = Ordinary.query.filter(Ordinary.usr_name =='Surejmohan12').first()
-                delete3 = Other.query.filter(Other.usr_name == 'Surejmohan12').first()
+                delete2 = Ordinary.query.filter(Ordinary.usr_name == session["user"]).first()
+                delete3 = Other.query.filter(Other.usr_name == session["user"]).first()
                 count = Count.query.filter(Count.id == 1).first()
                 count.Ordinary = count.Ordinary -1
 
             elif user.type == "Authority":
-                delete2 = Authority.query.filter(Authority.usr_name == 'Surejmohan12').first()
-                delete3 = Other.query.filter(Other.usr_name == 'Surejmohan12').first()
+                delete2 = Authority.query.filter(Authority.usr_name == session["user"]).first()
+                delete3 = Other.query.filter(Other.usr_name == session["user"]).first()
                 count = Count.query.filter(Count.id == 1).first()
                 count.Ordinary = count.Ordinary -1
         
@@ -711,26 +751,27 @@ def delete():
         else: 
             flash("You have entered Wrong Password",'error')
             return redirect(url_for('current'))
-        
-
-
-
-
 
         return ""
-
+  else:
+      return render_template('index.html',scroll='relogin')
 
 
 
 @app.route('/user/result/<path:filename>', methods=['GET', 'POST'])
 def download(filename):
-    return send_from_directory(directory='result', filename=filename)
+    if "user" in session:
+        return send_from_directory(directory='result', filename=filename)
+    else:
+      return render_template('index.html',scroll='relogin')
 
 
 
 @app.route('/user/upload', methods=['POST'])
 def train():
     
+  if "user" in session:
+
     filelist = [f for f in os.listdir('uploads/')]
     for f in filelist:
         os.remove(os.path.join('uploads/', f))
@@ -775,6 +816,11 @@ def train():
         for i in range(0,no_of_images):    
             img_bgr = cv2.imread(paths[i])
             image = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+            if len(detector(image, 1)) == 0 :
+                flash('Please change image: ' + myimages[i] + ' - it has No faces','error')
+                print("Please change image: " + myimages[i] + " - it has No faces; atleast one face needed")
+                return redirect(url_for('current'))
+
             if len(detector(image, 1)) > 1 :
                 flash('Please change image: ' + myimages[i] + ' - it has ' + str(len(detector(image, 1))) + " faces",'error')
                 print("Please change image: " + myimages[i] + " - it has " + str(len(detector(image, 1))) + " faces; it can only have one")
@@ -783,7 +829,7 @@ def train():
             _ ,img_shapes, _ = find_faces(image,myimages[i])
             descs[i] = encode_faces(image, img_shapes)[0]
         if request.form['action'] == 'Request_Video':
-            np.save('third_image/username.npy', descs)
+            np.save('third_image/'+ session["user"]+ '.npy', descs)
 
             dept = request.form['firstList']
             name = request.form['secondList'+ dept]
@@ -806,7 +852,7 @@ def train():
             print(mass.third_party_id)
             ID = mass.third_party_id
             
-            send = Other.query.filter_by(usr_name = 'Surejmohan').first()
+            send = Other.query.filter_by(usr_name = session["user"]).first()
             send.third_party_issue_id = ID
             send.third_party_pending_order = 'no'
             send.third_party_response = ''
@@ -818,15 +864,15 @@ def train():
             db.session.add(send)
             db.session.commit()
             flash("You have successfully submit your request. Please  Wait for the notification Mail ")
-            return render_template('output.html' ,output = 1)
+            return render_template('base/output.html' ,output = 1, user = session["user"])
 
 
 
 
            
         elif request.form['action'] == "Upload":
-            np.save('train/username.npy', descs)
-            descs = np.load('train/username.npy',allow_pickle=True)[()]
+            np.save('train/'+ session["user"]+'.npy', descs)
+            descs = np.load('train/'+session["user"]+'.npy',allow_pickle=True)[()]
             filelist2 = [f for f in os.listdir('video/')]
             for f in filelist2:
                 os.remove(os.path.join('video/', f))
@@ -855,7 +901,7 @@ def train():
                     output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
 
                     fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-                    writer = cv2.VideoWriter('result/username.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
+                    writer = cv2.VideoWriter('result/'+ session["user"] +'.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
                     m=-1
                     i=1
                     s=0
@@ -895,7 +941,7 @@ def train():
                     time = convert(s/24)
                     print(convert(s/24)) 
                     success = "You have successfully Processed the Video"
-                    return render_template('output.html',success = success, time = time)
+                    return render_template('base/output.html',success = success, time = time,user = session["user"] )
 
             else:
                 flash('Only one video can upload','error')
@@ -908,8 +954,8 @@ def train():
 
 
         elif request.form['action'] == "ON":
-            np.save('train/username.npy', descs)
-            descs = np.load('train/username.npy',allow_pickle=True)[()]
+            np.save('train/'+ session["user"] +'.npy', descs)
+            descs = np.load('train/'+ session["user"] +'.npy',allow_pickle=True)[()]
             
             cap = cv2.VideoCapture(0)
             if not cap.isOpened():
@@ -924,7 +970,7 @@ def train():
             output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
 
             fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-            writer = cv2.VideoWriter('result/username.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
+            writer = cv2.VideoWriter('result/'+ session["user"] +'.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
             m=-1
             i=1
             s=0
@@ -967,25 +1013,594 @@ def train():
             time = convert(s/24)
             print(convert(s/24)) 
             success = "You have successfully Processed the Video"
-            return render_template('output.html',success = success, time = time)
+            return render_template('base/output.html',success = success, time = time,user = session["user"])
 
         
     else:
         print("Error")
         exit()
+  else:
+      return render_template('index.html',scroll='relogin')
+
+#end
+
+
+
+#Thirdparty Page
+
+@app.route('/thirdparty')
+def  thirddashboard():
+
+  if "third" in session:
+
+    all = Other.query.filter_by(third_party_issue_id = session["third"],third_party_pending_order = 'no').all()
+    len1 = len(all)
+    if (len1 == 0):
+        value = 'None'
+        flash("You do not have any Request",'None')
+        return render_template('third/thirdparty.html',all=all,value = value,user=session["third"])
+
+    else:
+        value = 'success'
+        flash("You Have " + str(len1) + " Request",'success')
+        return render_template('third/thirdparty.html',all=all,value = value,user=session["third"])
+    
+  else:
+      return render_template('index.html',scroll='relogin')
+
+
+
+@app.route('/thirdparty/pendinguser',methods=['POST'])
+def  PendingUser():
+
+    if "third" in session:
+
+        if request.method == 'POST':
+
+            file = request.files['video']
+            userid = request.form['userid']
+            username = request.form['username']
+            response = request.form['response']
+            print(file.filename)
+            print(username)
+            if request.form['accept'] == "accept":
+
+                    if not allowed_file2(file.filename):
+                        flash('Invalid Video Format ;Only Mp4 Supported','errorvideo')
+                        print("Invalid Video Format ;Only Mp4 Supported")
+                        return redirect(url_for('thirddashboard'))
+                    file.filename = username + ".mp4"
+                    print(file.filename)
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(app.config['THIRDVIDEO'], filename))
+                    ord = Other.query.filter_by(id = userid).first()
+                    ord.third_party_pending_order = 'yes'
+                    ord.third_party_response = response
+                    db.session.add(ord)
+                    db.session.commit()
+                    flash("You have successfully submit Video",'success1')
+                    return redirect(url_for('thirddashboard'))
+            elif request.form['accept'] == "reject":
+                    ord = Other.query.filter_by(id = userid).first()
+                    ord.third_party_pending_order = 'reject'
+                    ord.third_party_response = response
+                    db.session.add(ord)
+                    db.session.commit()
+                    flash("You have successfully  Sent your Response ",'success2')
+                    return redirect(url_for('thirddashboard'))
+
+    else:
+      return render_template('index.html',scroll='relogin')
+
+            
+
+
+@app.route('/thirdparty/realtimevideo',methods=['POST'])
+def  reatimevideo1():
+  
+  if "third" in session:
+
+    filelist = [f for f in os.listdir('uploads/')]
+    for f in filelist:
+        os.remove(os.path.join('uploads/', f))
+
+    if request.method == 'POST':
+        
+        uploaded_files = request.files.getlist("livefile")
+        print(uploaded_files)
+        for f in uploaded_files:
+            if f and allowed_file1(f.filename):
+                filename = secure_filename(f.filename)
+                print(filename)
+                f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            else:
+                flash('Invalid Input File Format; only jpeg or jpg supported','errorimage')
+                print("Invalid Input File Format; only jpeg or jpg supported")
+                return redirect(url_for('thirddashboard'))
+        
+        myimages = []
+        dirfiles = os.listdir('uploads/')
+        sorted(dirfiles)
+        for files in dirfiles:
+            if '.jpg' in files:
+                myimages.append(files)
+            if '.jpeg' in files:
+                myimages.append(files)
+        no_of_images = len(myimages)
+        if no_of_images > 2:
+            flash('Maximum Number of Images is 2','errornumber')
+            print("Maximum Number of Images is 2 ")
+            filelist = [f for f in os.listdir('uploads/')]
+            for f in filelist:
+                os.remove(os.path.join('uploads/', f))
+            return redirect(url_for('thirddashboard'))
+
+
+        names = [x[:-4] for x in myimages]
+        paths = ['uploads/' + x for x in myimages]
+        print(names) 
+    
+        descs = {}
+
+        for i in range(0,no_of_images):    
+            img_bgr = cv2.imread(paths[i])
+            image = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+            if len(detector(image, 1)) == 0 :
+                flash('Please change image: ' + myimages[i] + ' - it has No faces','errorface')
+                print("Please change image: " + myimages[i] + " - it has No faces; atleast one face needed")
+                return redirect(url_for('thirddashboard'))
+            elif len(detector(image, 1)) > 1 :
+                flash('Please change image: ' + myimages[i] + ' - it has ' + str(len(detector(image, 1))) + ' faces','errorface')
+                print("Please change image: " + myimages[i] + " - it has " + str(len(detector(image, 1))) + " faces; it can only have one")
+                return redirect(url_for('thirddashboard'))
+
+            _ ,img_shapes, _ = find_faces(image,myimages[i])
+            descs[i] = encode_faces(image, img_shapes)[0]
+        
+        np.save('train/descs.npy', descs)
+        descs = np.load('train/descs.npy',allow_pickle=True)[()]
+            
+        cap = cv2.VideoCapture(0)
+        if not cap.isOpened():
+            flash('Camera is not working','errorcamera')
+            print("Camera is not working")
+            return redirect(url_for('thirddashboard'))
+        
+        _, img_bgr = cap.read()
+        padding_size = 0
+        resized_width = 1360
+        video_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1]))
+        output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
+
+        fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+        writer = cv2.VideoWriter('result/'+ session["third"] +'.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
+        m=-1
+        i=1
+        s=0
+        while True:
+                        
+            ret, img_bgr = cap.read()
+            if not ret:
+                break
+
+            img_bgr = cv2.resize(img_bgr, video_size)
+            img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+            dets = detector(img_bgr, 1)
+
+            for k, d in enumerate(dets):
+                shape = sp(img_rgb, d)
+                face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
+
+                last_found = {'name': 'unknown', 'dist': 0.48, 'color': (0,0,255)}
+
+                for name, saved_desc in descs.items():
+                    dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
+
+                    if dist < last_found['dist']:
+                        last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255)}
+                        if m == -1:
+                            s = i
+                            m=0
+                                    
+                cv2.rectangle(img_bgr, pt1=(d.left(), d.top()), pt2=(d.right(), d.bottom()), color=last_found['color'], thickness=2)
+                cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
+            i=i+1
+            writer.write(img_bgr)
+            cv2.imshow('img', img_bgr)
+            if cv2.waitKey(1) == ord('q'):
+                break
+                    
+                
+        cap.release()
+        writer.release()
+        time = convert(s/24)
+        print(convert(s/24)) 
+        flash("You have successfully Processed the Video",'success3')
+        return redirect(url_for('thirddashboard'))
+    
+
+
+    else:
+        print("Error")
+        exit()
+  else:
+      return render_template('index.html',scroll='relogin')
 
 
 #end
 
+
+
+#admin page
+
+@app.route('/Admin')
+def  admindashboard():
+    if "admin" in session:
+        user = session["admin"]
+        return render_template('admin/dashboard.html',user=user)
+    else:
+        
+        return render_template('index.html',scroll='relogin')
+    
+
+
+@app.route('/Admin/user')
+def user():
+    if "admin" in session:
+        user = session["admin"]
+        ordinary = (db.session.query(Ordinary).filter(Ordinary.usr_name == Other.usr_name).join(Other,Other.admin_approval == 'no')).all()
+        authority = (db.session.query(Authority).filter(Authority.usr_name == Other.usr_name).join(Other,Other.admin_approval == 'no')).all()
+        return render_template('admin/user.html',ordinary = ordinary,authority = authority,user=user)
+    else:
+        return render_template('index.html',scroll='relogin')
+
+
+@app.route('/user')
+def user1():
+    if "admin" in session:
+        user = session["admin"]
+        ordinary = (db.session.query(Ordinary).filter(Ordinary.usr_name == Other.usr_name).join(Other,Other.admin_approval == 'no')).all()
+        authority = (db.session.query(Authority).filter(Authority.usr_name == Other.usr_name).join(Other,Other.admin_approval == 'no')).all()
+        return render_template('admin/user.html',ordinary = ordinary,authority = authority,user=user)
+    else:
+        render_template('index.html',scroll='relogin')
+
+
+@app.route('/Admin/user/verify/<path:username>/<path:value>')
+def verify(username,value):
+    if "admin" in session:
+        user = session["admin"]
+        print(username)
+        result = value
+        print(result)
+        verify = Other.query.filter_by(usr_name = username).first()
+        if result == 'accept':
+            verify.admin_approval = 'accept'
+            verify.admin_id = 'Surej'
+            db.session.add(verify)
+            db.session.commit()
+            flash('Verified successfully')
+            return redirect(url_for('user',user=user))
+        elif result == 'reject':
+            verify.admin_approval = 'reject'
+            verify.admin_id = 'Surej'
+            db.session.add(verify)
+            db.session.commit()
+         
+            flash('Verified successfully')
+            return redirect(url_for('user',user=user))
+    else:
+        return render_template('index.html',scroll='relogin')
+
+
+         
+         
+@app.route('/Admin/process')
+def  process():
+    if "admin" in session:
+        user = session["admin"]
+        succ = Other.query.filter_by(third_party_pending_order ='yes' ).all()
+        fail = Other.query.filter_by(third_party_pending_order ='reject' ).all()
+        print(succ)
+        print(fail)
+        return render_template('admin/process.html',succ = succ,fail = fail ,user=user)
+    else:
+        return render_template('index.html',scroll='relogin')
+
+
+
+@app.route('/Admin/processing/<path:uname>')
+def  processing(uname):
+
+    if "admin" in session:
+            descs = np.load('third_image/'+ uname +'.npy',allow_pickle=True)[()]
+            video_path = 'third_video/'+ uname + '.mp4'
+            print(video_path)
+            cap = cv2.VideoCapture(video_path)
+            if not cap.isOpened():
+                flash('Video cannot Open','error')
+                print("Video cannot Open")
+                return redirect(url_for('process'))
+            _, img_bgr = cap.read()
+            padding_size = 0
+            resized_width = 1920
+            video_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1]))
+            output_size = (resized_width, int(img_bgr.shape[0] * resized_width // img_bgr.shape[1] + padding_size * 2))
+            fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+            writer = cv2.VideoWriter('result/'+ uname +'.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS), output_size)
+            m=-1
+            i=1
+            s=0
+            while True:
+                        
+                ret, img_bgr = cap.read()
+                if not ret:
+                    break
+    
+                img_bgr = cv2.resize(img_bgr, video_size)
+                img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+                dets = detector(img_bgr, 1)
+
+                for k, d in enumerate(dets):
+                    shape = sp(img_rgb, d)
+                    face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
+
+                    last_found = {'name': 'unknown', 'dist': 0.45, 'color': (0,0,255)}
+
+                    for name, saved_desc in descs.items():
+                        dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
+
+                        if dist < last_found['dist']:
+                            last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255)}
+                            if m == -1:
+                                s = i
+                                m=0
+                                    
+                    cv2.rectangle(img_bgr, pt1=(d.left(), d.top()), pt2=(d.right(), d.bottom()), color=last_found['color'], thickness=2)
+                    cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
+                i=i+1
+                writer.write(img_bgr)
+                    
+                
+            cap.release()
+            writer.release()
+            time = convert(s/24)
+            print(convert(s/24)) 
+            success = "You have successfully Processed the Video"
+            return "Compltede"
+
+   
+
+
+    else:
+        return render_template('index.html',scroll='relogin')
+  
+
+
+
+
+
+
+
+@app.route('/third_video/<path:filename>', methods=['GET', 'POST'])
+def download3(filename):
+    if "admin" in session:
+        return send_from_directory(directory='third_video', filename=filename)
+    else:
+      return render_template('index.html',scroll='relogin')
+
+
+
+@app.route('/ID_Proof/<path:filename>', methods=['GET', 'POST'])
+def download2(filename):
+    if "admin" in session:
+        user = session["admin"]
+        return send_from_directory(directory='ID_Proof', filename=filename,user=user)
+    else:
+        return render_template('index.html',scroll='relogin')
+
+
+
+@app.route('/Admin/third_party', methods=["GET","POST"])
+def third():
+    if "admin" in session:
+        user = session["admin"]
+        all = db.session.query(Third.dept.distinct()).all()
+        len1 = len(all)
+     
+     
+        if request.method == "POST":
+            dept = request.form['firstList']
+            new = request.form['secondList']
+            name = request.form['thirdList']
+            phone = request.form['phone']
+            mail1 = request.form['fourthList']
+            if dept == 'Other':
+                dept = new
+            exists = Third.query.filter_by(mail = mail1).first()
+
+            if not exists:
+            
+                v1 = randint(0, 1000)
+                v2 = randint(0, 1000)
+                value = Count.query.filter_by(id = 1).first()
+                uname = dept + '_' + str(value.Third_party+1)
+                third_party_id = uname
+                psw=str(v1)+name+str(v2)
+            
+
+                user = User(username=uname,password=psw,type='Third_party')
+                register = Third(usr_name = uname, dept=dept, name=name, mail = mail1, phone=phone, third_party_id = third_party_id)
+                count = Count.query.filter_by(id = 1).first()
+                count.Third_party = count.Third_party + 1
+                db.session.add(user)
+                db.session.add(register)
+                db.session.add(count)
+                db.session.commit()
+            
+                msg = Message('Welcome to Pinpoint Family', sender = 'pinpoint.four.2020@gmail.com', recipients = [mail1])
+                msg.html = '<h5>Hi,</h5><h3>You are addded as Third Party at PINPOINT.<br>Please login PINPOINT using following details</h3><h5> Your Username : {} <br> Password : {}<br><br> Happy to connect with u <BR> Thank you<h5>'.format(uname,psw)
+
+                mail.send(msg)
+
+
+            
+                flash('A new Third Party added successfully','success')
+                return render_template('admin/add_third.html',all = all, user=user)
+            else:
+                flash('Already Registered','error')
+
+
+        if all != None:
+            return render_template('admin/add_third.html',all = all,user=user)
+        else:
+            return render_template('admin/add_third.html',user=user)
+    else:
+        return render_template('index.html',scroll='relogin')
+
+
+
+
+
+
+
+
+@app.route('/Admin/add_admin', methods=["GET","POST"])
+
+def register():
+    if "admin" in session:
+        user = session["admin"]       
+        if request.method == "POST":
+            uname = request.form['uname']
+            email = request.form['mail']
+            fname = request.form['fname']
+            lname = request.form['lname']
+            phone = request.form['phone']
+
+            exists = User.query.filter_by(username = uname).first()
+
+            if not exists:
+                
+                v1 = randint(0, 1000)
+                v2 = randint(100, 999)
+                psw=str(v1)+uname+str(v2)
+                value = Count.query.filter_by(id = 1).first()
+                admin_id = "Admin_" + str(value.Admin+1)
+
+                user = User(username=uname,password=psw,type='Admin')
+                register = Admin(usr_name = uname,fname=fname,lname=lname,mail = email, phone=phone, admin_id = admin_id)
+                count = Count.query.filter_by(id = 1).first()
+                count.Admin = count.Admin + 1
+                db.session.add(user)
+                db.session.add(register)
+                db.session.add(count)
+                db.session.commit()
+                
+                
+                msg = Message('Welcome to Pinpoint Family', sender = 'pinpoint.four.2020@gmail.com', recipients = [email])
+                msg.html = '<h5>Hi {}&emsp;{},</h5><h3>You are addded as admin at PINPOINT.<br>Please login PINPOINT using following details</h3><h5> Your Username : {} <br> Password : {}<br><br> Happy to connect with u <BR> Thank you<h5>'.format(fname,lname,uname,psw)
+
+                mail.send(msg)
+
+                
+                flash('A new admin added successfullly','success')
+                return render_template('admin/add_admin.html',user=user)
+            else:
+                flash('Username already taken,try somethig else','error')
+
+            
+        return render_template('admin/add_admin.html',user=user)
+    else:
+        return render_template('index.html',scroll='relogin')
+
+@app.route('/Admin/remove_user')
+def remove():
+    if "admin" in session:
+        user = session["admin"]
+
+        admin = Admin.query.all()
+        normal= Ordinary.query.all()
+        third = Third.query.all()
+        officials = Authority.query.all()
+        
+        
+        return render_template('admin/remove.html', admin=admin,normal=normal,third=third, officials=officials,user=user)
+    else:
+        return render_template('index.html',scroll='relogin')
+
+
+
+@app.route('/delete/<string:usr_name>/', methods = ['GET', 'POST'])
+def delete2(usr_name):
+    if "admin" in session:
+        user = session["admin"]
+        user= User.query.filter(User.username == usr_name).first()
+        print(usr_name)
+        print(user.type)
+
+        
+        mydata = db.session.query(Admin).filter(Admin.usr_name == usr_name).first()
+
+        my_data2=Ordinary.query.filter(usr_name==usr_name).first()
+
+        my_data3=Third.query.filter(usr_name==usr_name).first()
+
+        my_data4 = Authority.query.filter(usr_name==usr_name).first()
+        count = Count.query.filter_by(id = 1).first()
+        
+
+
+        if user.type == "Admin":
+            count.Admin = count.Admin - 1
+            db.session.add(count)
+            db.session.delete(mydata)
+            db.session.delete(user)
+
+        elif user.type == "Ordinary":
+            count.Ordinary = count.Ordinary - 1
+            db.session.add(count)
+            db.session.delete(my_data2)
+            db.session.delete(user)
+
+        elif user.type == "Third_party":
+            count.Third_party = count.Third_party - 1
+            db.session.add(count)
+            db.session.delete(my_data3)
+            db.session.delete(user)
+
+        elif user.type == "Authority":
+            count.Authority = count.Authority - 1
+            db.session.add(count)
+            db.session.delete(my_data4)
+            db.session.delete(user)
+
+        db.session.commit()
+        flash("User Deleted Successfully",'success')
+        return redirect(url_for('remove',user=user))
+    else:
+        return render_template('index.html',scroll='relogin')
+
+
 #end
 
 
+#end
 
-@app.route('/logout', methods=['GET', 'POST'])
+
+@app.route("/logout")
 def logout():
-    return ""
+    session.clear()
+    return render_template('index.html',scroll='relogin')
 
 
 
 if(__name__ == "__main__"):
     app.run(debug=True)
+
+
+
+
+#insert into Count(id,Ordinary,Authority,Admin,Third_party,Total_Real,Total_upload,Total_request) values (1,0,0,0,0,0,0,0);
+
+
+

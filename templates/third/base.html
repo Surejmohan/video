@@ -111,9 +111,11 @@ function Reject()
   <body class="dark-edition">
     <div class="wrapper">
       <div class="sidebar" data-color="purple" data-background-color="black" data-image="{{url_for('static', filename='img/sidebar-2.jpg')}}">
-        <div class="logo"><a href="/" class="simple-text logo-normal">
+        <div class="logo">
+          <a href="/" class="simple-text logo-normal">
             PINPOINT THIRD PARTY
-          </a></div>
+          </a>
+        </div>
         <div class="sidebar-wrapper">
           <ul class="nav">
             <li class="nav-item active ">
@@ -140,11 +142,26 @@ function Reject()
       </div>
       <div class="main-panel">
             <!-- Navbar -->
-            {% block navbar %}
-      
-     
-     
-      {% endblock %}
+<nav id="nav-menu-container">
+  <ul class="nav-menu pull-right" style="margin: 30px;">
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret">Hi,&nbsp;{{user}}</span></a>
+      <ul class="dropdown-menu">
+        <li><a href="#editprofile" onclick="Updateprofile()">Edit Profile</a>
+        </li>
+        <li><a href="#updatediv" onclick="UpdatePassword()"> Change Password</a>
+        </li>
+        <li><a href="#updateusername" onclick="Updateusername()">Change Username</a>
+        </li>
+        <li><a href="/logout">Logout</a>
+        </li>
+        <li><a href="/delete">Delete Account</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
 
       {% block body %} {% endblock %}
     {% include 'third/footer.html' %}

@@ -67,7 +67,7 @@ facerec = dlib.face_recognition_model_v1('models/dlib_face_recognition_resnet_mo
 #database models
 db = SQLAlchemy(app)
 #db is the refrence
-
+de = 0.5
 #User table
 class User(db.Model):
     __tablename__ = 'User'
@@ -513,6 +513,8 @@ def current():
     id = User.query.filter_by(username = session["user"]).first()
     id2 = id.type
     print(id2)
+    notifi = Other.query.filter_by(usr_name = session["user"],no_of_video_request = 2).first()
+    print(notifi)
     if(id.type == "Ordinary"):
         pro = Ordinary.query.filter_by(usr_name = session["user"]).first()
         print(pro)
@@ -522,10 +524,10 @@ def current():
 
     
     if all == []:
-        return render_template('base/current.html',third = "third",profile=pro,id = id2,user = session["user"])
+        return render_template('base/current.html',third = "third",profile=pro,id = id2,notifi = notifi,user = session["user"])
 
 
-    return render_template('base/current.html',all=all,a=a,profile=pro,id = id2,user = session["user"])
+    return render_template('base/current.html',all=all,a=a,profile=pro,id = id2,notifi = notifi,user = session["user"])
   
   else:
       return render_template('index.html',scroll='relogin')
@@ -829,6 +831,18 @@ def train():
             _ ,img_shapes, _ = find_faces(image,myimages[i])
             descs[i] = encode_faces(image, img_shapes)[0]
         if request.form['action'] == 'Request_Video':
+
+            check = Other.query.filter_by(usr_name = session["user"]).first()
+            if check.no_of_video_request == 1:
+                flash('You have already request for one video so you cannot Request anymore','error')
+                print("You have already request for one video so you cannot Request anymore")
+                return redirect(url_for('current'))
+            if check.no_of_video_request == 2:
+                flash('Please check your Notification;Then only we will consider your next request','error')
+                print("Please check your Notification;Then only we will consider your next request")
+                return redirect(url_for('current'))
+
+
             np.save('third_image/'+ session["user"]+ '.npy', descs)
 
             dept = request.form['firstList']
@@ -873,10 +887,7 @@ def train():
         elif request.form['action'] == "Upload":
             np.save('train/'+ session["user"]+'.npy', descs)
             descs = np.load('train/'+session["user"]+'.npy',allow_pickle=True)[()]
-            filelist2 = [f for f in os.listdir('video/')]
-            for f in filelist2:
-                os.remove(os.path.join('video/', f))
-
+            
             videos = request.files.getlist("videos")
             f = videos[0]
             if len(videos) == 1 :
@@ -884,6 +895,7 @@ def train():
                         flash('Invalid Video Format ;Only Mp4 Supported','error')
                         print("Invalid Video Format ;Only Mp4 Supported")
                         return redirect(url_for('current'))
+                    f.filename = session["user"] + ".mp4"
                     filename = secure_filename(f.filename)
                     f.save(os.path.join(app.config['UPLOAD_VIDEO'], filename))
                     video_path = 'video/'+ f.filename
@@ -919,7 +931,7 @@ def train():
                             shape = sp(img_rgb, d)
                             face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
 
-                            last_found = {'name': 'unknown', 'dist': 0.45, 'color': (0,0,255)}
+                            last_found = {'name': 'unknown', 'dist': de, 'color': (0,0,255)}
 
                             for name, saved_desc in descs.items():
                                 dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
@@ -941,6 +953,18 @@ def train():
                     time = convert(s/24)
                     print(convert(s/24)) 
                     success = "You have successfully Processed the Video"
+
+                    send = Other.query.filter_by(usr_name = session["user"]).first()
+                    send.no_of_video_upload = send.no_of_video_upload + 1
+                    db.session.add(send)
+
+                    count = Count.query.filter_by(id = 1).first()
+                    count.Total_upload = count.Total_upload + 1
+                    db.session.add(count)
+
+                    db.session.commit()
+                    
+
                     return render_template('base/output.html',success = success, time = time,user = session["user"] )
 
             else:
@@ -988,7 +1012,7 @@ def train():
                     shape = sp(img_rgb, d)
                     face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
 
-                    last_found = {'name': 'unknown', 'dist': 0.48, 'color': (0,0,255)}
+                    last_found = {'name': 'unknown', 'dist': de, 'color': (0,0,255)}
 
                     for name, saved_desc in descs.items():
                         dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
@@ -1013,6 +1037,17 @@ def train():
             time = convert(s/24)
             print(convert(s/24)) 
             success = "You have successfully Processed the Video"
+
+            send = Other.query.filter_by(usr_name = session["user"]).first()
+            send.live_recording_no = send.live_recording_no + 1
+            db.session.add(send)
+
+            count = Count.query.filter_by(id = 1).first()
+            count.Total_Real = count.Total_Real + 1
+            db.session.add(count)
+
+            db.session.commit()
+
             return render_template('base/output.html',success = success, time = time,user = session["user"])
 
         
@@ -1020,6 +1055,22 @@ def train():
         print("Error")
         exit()
   else:
+      return render_template('index.html',scroll='relogin')
+
+
+
+
+@app.route('/user/Processed/result/<path:filename>', methods=['GET', 'POST'])
+def download5(filename):
+    if "user" in session:
+
+        send = Other.query.filter_by(usr_name = session["user"]).first()
+        send.no_of_video_request = 0
+        db.session.add(send)
+        db.session.commit()
+
+        return send_from_directory(directory='result', filename=filename)
+    else:
       return render_template('index.html',scroll='relogin')
 
 #end
@@ -1191,7 +1242,7 @@ def  reatimevideo1():
                 shape = sp(img_rgb, d)
                 face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
 
-                last_found = {'name': 'unknown', 'dist': 0.48, 'color': (0,0,255)}
+                last_found = {'name': 'unknown', 'dist': de, 'color': (0,0,255)}
 
                 for name, saved_desc in descs.items():
                     dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
@@ -1215,6 +1266,13 @@ def  reatimevideo1():
         writer.release()
         time = convert(s/24)
         print(convert(s/24)) 
+
+
+        count = Count.query.filter_by(id = 1).first()
+        count.Total_Real = count.Total_Real + 1
+        db.session.add(count)
+        db.session.commit()
+
         flash("You have successfully Processed the Video",'success3')
         return redirect(url_for('thirddashboard'))
     
@@ -1301,9 +1359,11 @@ def  process():
         user = session["admin"]
         succ = Other.query.filter_by(third_party_pending_order ='yes' ).all()
         fail = Other.query.filter_by(third_party_pending_order ='reject' ).all()
+        processed = Other.query.filter_by(no_of_video_request = 2 ).all()
         print(succ)
         print(fail)
-        return render_template('admin/process.html',succ = succ,fail = fail ,user=user)
+        print(processed)
+        return render_template('admin/process.html',succ = succ ,fail = fail ,processed = processed ,user=user)
     else:
         return render_template('index.html',scroll='relogin')
 
@@ -1345,7 +1405,7 @@ def  processing(uname):
                     shape = sp(img_rgb, d)
                     face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
 
-                    last_found = {'name': 'unknown', 'dist': 0.45, 'color': (0,0,255)}
+                    last_found = {'name': 'unknown', 'dist': de, 'color': (0,0,255)}
 
                     for name, saved_desc in descs.items():
                         dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
@@ -1367,7 +1427,24 @@ def  processing(uname):
             time = convert(s/24)
             print(convert(s/24)) 
             success = "You have successfully Processed the Video"
-            return "Compltede"
+
+            send = Other.query.filter_by(usr_name = uname).first()
+            send.third_party_issue_id = ''
+            send.third_party_pending_order = ''
+            send.third_party_response = ''
+            send.date = ''
+            send.start_time = ''
+            send.end_time = ''
+            send.no_of_video_request = 2
+            db.session.add(send)
+
+            count = Count.query.filter_by(id = 1).first()
+            count.Total_request = count.Total_request + 1
+            db.session.add(count)
+
+            db.session.commit()
+            flash('You have successfully processed the video','procc')
+            return redirect(url_for('process'))
 
    
 
@@ -1376,9 +1453,12 @@ def  processing(uname):
         return render_template('index.html',scroll='relogin')
   
 
-
-
-
+@app.route('/Admin/Processed/result/<path:filename>', methods=['GET', 'POST'])
+def download4(filename):
+    if "admin" in session:
+        return send_from_directory(directory='result', filename=filename)
+    else:
+      return render_template('index.html',scroll='relogin')
 
 
 
@@ -1457,9 +1537,6 @@ def third():
             return render_template('admin/add_third.html',user=user)
     else:
         return render_template('index.html',scroll='relogin')
-
-
-
 
 
 
@@ -1584,14 +1661,13 @@ def delete2(usr_name):
 #end
 
 
-#end
-
-
 @app.route("/logout")
 def logout():
     session.clear()
     return render_template('index.html',scroll='relogin')
 
+
+#end
 
 
 if(__name__ == "__main__"):

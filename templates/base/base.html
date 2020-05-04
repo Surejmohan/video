@@ -9,9 +9,12 @@
   
  
  
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer>
+  </script>
 
-
+<script>
+  window.setTimeout("document.getElementById('message').style.display='none';",5000);
+</script>
 
  {% block script %}  {% endblock %}
  {% block style %}   {% endblock %}

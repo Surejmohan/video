@@ -105,6 +105,7 @@ function Updateusername()
   $("#editprofile").hide();
   $("#updatepassword").hide();
   $("#deleteaccount").hide();
+  $("#notification").hide();
   document.getElementById("updateusername").style.display = 'block';
   $("#updateusername").show();
 
@@ -121,6 +122,7 @@ function Updatepassword()
   $("#editprofile").hide();
   $("#updateusername").hide();
   $("#deleteaccount").hide();
+  $("#notification").hide();
   document.getElementById("updatepassword").style.display = 'block';
   $("#updatepassword").show();
 
@@ -135,11 +137,22 @@ function DeleteAccount()
   $("#updatepassword").hide();
   $("#updateusername").hide();
   $("#editprofile").hide();
+  $("#notification").hide();
   document.getElementById("deleteaccount").style.display = 'block';
   $("#deleteaccount").show();
 }
 
 
+function Notifications()
+{
+  $("#curent").hide();
+  $("#updatepassword").hide();
+  $("#updateusername").hide();
+  $("#editprofile").hide();
+  $("#deleteaccount").hide();
+  document.getElementById("notification").style.display = 'block';
+  $("#notification").show();
+}
 
 
 function Updateprofile()
@@ -149,6 +162,7 @@ function Updateprofile()
   $("#updatepassword").hide();
   $("#updateusername").hide();
   $("#deleteaccount").hide();
+  $("#notification").hide();
   document.getElementById("editprofile").style.display = 'block';
   $("#editprofile").show();
 
@@ -364,6 +378,8 @@ function hidepreview()
               </li>
               <li><a href="#updatepassword" onclick="Updatepassword()">Change Password</a>
               </li>
+              <li><a href="#notification" onclick="Notifications()">Notification{% if notifi != None %} &nbsp;<b style="color: red;">(1)</b> {% endif %} </a>
+              </li>
               <li><a href="#updateusername" onclick="Updateusername()">Change Username</a>
               </li>
               <li><a href="/logout">Logout</a>
@@ -388,14 +404,14 @@ function hidepreview()
                
                 {% for category, message in messages %}
                 {% if category == 'success' %}
-                <div class="alert alert-success alert-dismissible fade show" style="max-width: 50%;">
+                <div id="message" class="alert alert-success alert-dismissible fade show" style="max-width: 50%;">
                   <strong>Success!</strong> {{ message }}
               </div>
               {% endif %}
 
               {% if category == 'error' %}
 
-              <div class="alert alert-danger alert-dismissible fade show" style="max-width: 50%;">
+              <div  id="message" class="alert alert-danger alert-dismissible fade show" style="max-width: 50%;">
                 <strong>Error!</strong> {{ message }}
             </div>
 
@@ -607,6 +623,48 @@ function hidepreview()
   </div>
     
     <!---->
+
+
+    <div  id="notification"style="display: none;" >
+
+      {% if notifi != None %}
+      <div class="container-fluid" style="margin-top: 100px; margin-bottom: 100px;padding: 2%; border-style: solid;
+    border-color:#2dc997; border-radius: 7%; max-width: 650px;background-color: aliceblue;">
+
+    <h2 style="text-align: center;font-weight: bold;"id ="login">RESULT VIDEO </h2>
+    <center>
+      <br>
+      <label>Output : &nbsp; Found </label>
+      <br>
+      <label>Time Spotted &nbsp;:&nbsp;</label>
+      <br>
+      <br>
+      <p>Click on the icon to view the Output video:<p>
+        <a href="/user/Processed/result/{{user}}.mp4"  target="_blank">
+            <img src="{{url_for('static', filename='img/download.png')}}" width="50" height="75" align="middle" />
+        </a>
+        <br><br>
+        <a href="/user/current"class="btn btn-danger" type="submit"><b>BACK</b></a>
+       
+
+
+    </center>
+
+    </div>
+    {% endif %}
+
+    {% if notifi == None %}
+    <center>
+    <div  id="message" class="alert alert-warning alert-dismissible fade show" style="max-width: 500px;margin-top: 100px;margin-bottom: 300px;">
+      <strong>Warning!</strong> You don't have any notification <br>
+  <br><br>
+     <center>Click to &nbsp; <a href="/user/current"class="btn btn-primary" type="submit"><b>Redirect</b></a></center>
+  </div>
+</center>
+    {% endif %}
+    </div>
+
+
 
 
 

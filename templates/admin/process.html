@@ -6,7 +6,18 @@
             <div class="col-md-12">
               <div class="card">
                 <div class="container mt-3" id="Message">
-                 
+                  {% with messages = get_flashed_messages(with_categories=True) %}
+                     {% if messages %}
+               
+                       {% for category, message in messages %}
+                          {% if category == 'procc' %}
+                            <div id ="message" class="alert alert-success mb-3" role="alert">
+                             {{message}} <br>
+                            </div>
+                         {% endif %}
+                       {% endfor %}
+                    {% endif %}
+                  {% endwith %}
             </div>
                 <div class="card-header card-header-primary">
                   <h4 class="card-title">Response from Third party </h4>
@@ -32,13 +43,106 @@
               </tr>
           
               
-            {% if succ == [] %}
+            {% if succ == [] and processed == [] %}
               <div class="alert alert-danger">
                 <strong>Info!</strong> There are no respose yet !!!
               </div>
               {% endif %}
+              
+              {% if processed != [] %}
+
+                {% for user in processed %}
+
+
+                <tr>
+                          
+
+                            
+
+                  <td> {{user.usr_name}}</td> 
+                  <td></td>
+                  <td>
+                   <a href="" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{user.id}}">Output Video</a>
+                   <button type="button" disabled class="btn btn-secondary"><b style="color: rgba(255, 255, 255, 0.596);">Processed</b></button> 
+                   <a href ="" class="btn btn-info">Inform User</a>
+
+
+               </td>
+
+                 </tr>
+                 
+               
+       <!-- Modal Edit Employee-->
+<div id="modaledit{{user.id}}" class="modal fade"  role="dialog">
+<div id=co  style="color: black;">
+<div class="modal-dialog">
+
+
+<div class="modal-content">
+
+
+<div class="modal-header">
+
+
+<h4 class="modal-title">Output Video options</h4>
+
+
+</div>
+
+
+<div class="modal-body" >
+
+ 
+   <div class="form-group">
+
+
+      <label  style= "color:#343a40;font-size: 20px;"><b>Third Party Details</b></label>
+      <br>
+      <br>
+      <label  style= "color:#343a40"><b>Third Party ID:</b>&nbsp;&nbsp;{{user.third_party_issue_id}}</label>
+      <br>
+      <label  style= "color:#343a40"><b>Third Party Feedback:</b>&nbsp;&nbsp;{{user.third_party_response}}</label>
+
+      
+
+
+   </div>
+
+
+<p>Click on the icon to view the Output video:<p>
+ <a href="/Admin/Processed/result/{{user.usr_name}}.mp4" download="true" target="_blank">
+     <img src="{{url_for('static', filename='img/download.png')}}" width="50" height="75" align="middle" />
+ </a>
+
+</div>
+
+
+<div class="modal-footer">
+
+
+<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+</div>
+</div>
+                                       
+
+           
+   
+{% endfor %}
+              
                         
-                      
+    {% endif %}
+
+
               {% for user in succ %}
                         <tr>
                           
@@ -48,7 +152,7 @@
                              <td> {{user.usr_name}}</td> 
                              <td></td>
                              <td>
-                              <a href="" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{id}}">Check Video</a>
+                              <a href="" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{user.id}}">Check Video</a>
                               <a type="submit" href="/Admin/processing/{{user.usr_name}}" class="btn btn-success" onclick="return confirm('Are You Sure to start processing now ? Once it started it cannot be cancel and it will take some time')">start processing</a> 
                               <button class="btn btn-info">Inform User</button>
 
@@ -59,7 +163,7 @@
                             
                           
                   <!-- Modal Edit Employee-->
-<div id="modaledit{{id}}" class="modal fade"  role="dialog">
+<div id="modaledit{{user.id}}" class="modal fade"  role="dialog">
   <div id=co  style="color: black;">
   <div class="modal-dialog">
 
@@ -79,9 +183,6 @@
         <div class="modal-body" >
 
 
-           <form  method="POST" action="/Admin/processing">
-
-          <input type="hidden" value="{{user.usr_name}}" name= "username">
             
               <div class="form-group">
 
@@ -192,7 +293,7 @@
          <div class="modal-body" >
  
  
-            <form  method="POST">
+           
  
            
              
@@ -206,7 +307,7 @@
  
                </div>
  
-            </form>
+            
             <p>Click on the icon to download video:<p>
              <a href="" download="">
                  <img src="{{url_for('static', filename='img/download.png')}}" width="50" height="75" align="middle" />

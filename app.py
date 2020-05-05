@@ -315,9 +315,25 @@ def allowed_file3(filename):
 
 @app.route('/')
 def index():
+    value = Count.query.filter_by(id = 1).first()
     #return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
-    return render_template('index.html')
+    return render_template('index.html',value = value)
 
+@app.route('/error')
+def error():
+    value = Count.query.filter_by(id = 1).first()
+    
+    #return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
+    
+    return render_template('index.html',scroll='re',value = value)
+
+
+@app.route('/relogin')
+def relogin():
+    value = Count.query.filter_by(id = 1).first()
+    #return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
+    return render_template('index.html',scroll='relogin',value = value)
+    
 
 
 
@@ -373,12 +389,13 @@ def Register():
                     return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
             else:
                 flash('Password and Confirm password not matched','error')
-                return render_template('index.html',scroll='re')
+                return redirect(url_for('error'))
+                
 
 
      else:
          flash('Username already taken,try somethig else','error')
-         return render_template('index.html',scroll='re')
+         return redirect(url_for('error'))
              
 
     
@@ -446,12 +463,12 @@ def Register2():
                     return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
             else:
                 flash('Password and Confirm password not matched','error')
-                return render_template('index.html',scroll='re')
+                return redirect(url_for('error'))
 
         else:
             
             flash('Username already taken,try somethig else','error')
-            return render_template('index.html',scroll='re')
+            return redirect(url_for('error'))
         
 
 
@@ -469,22 +486,23 @@ def login():
             
             if login.type == 'Admin':
                 session["admin"] = uname
-
+                flash(uname + ' Successfully Logged in','mass')
                 return redirect(url_for('admindashboard'))
 
             elif login.type == 'Ordinary' or login.type == 'Authority':
                 session["user"] = uname
-
+                flash(uname + ' Successfully Logged in','mass')
                 return redirect(url_for('current'))
 
             elif login.type == 'Third_party':
                 session["third"] = uname
+                flash(uname + ' Successfully Logged in','mass')
                 return redirect(url_for('thirddashboard'))
             else: 
                 return "ll"
         else:
             flash('User is Not Registerd','error')
-            return render_template('index.html',scroll='relogin')
+            return redirect(url_for('relogin'))
 
             
 #end
@@ -530,7 +548,7 @@ def current():
     return render_template('base/current.html',all=all,a=a,profile=pro,id = id2,notifi = notifi,user = session["user"])
   
   else:
-      return render_template('index.html',scroll='relogin')
+      return redirect(url_for('relogin'))
 
 
 
@@ -539,7 +557,7 @@ def output():
     if "user" in session:
         return render_template('base/output.html',user = session["user"])
     else:
-      return render_template('index.html',scroll='relogin')
+      return redirect(url_for('relogin'))
 
 
 
@@ -616,7 +634,7 @@ def profileupdate():
 
          return typeid
     else:
-      return render_template('index.html',scroll='relogin')
+      return redirect(url_for('relogin'))
 
 
 @app.route('/user/update/password', methods=['POST'])
@@ -648,8 +666,7 @@ def passwordupdate():
         return redirect(url_for('current'))
   
   else:
-      return render_template('index.html',scroll='relogin')
-
+      return redirect(url_for('relogin'))
 
 
 
@@ -687,6 +704,7 @@ def usernameupdate():
                         db.session.add(ord)
                         db.session.add(oth)
                         db.session.commit()
+                        session["user"] = newuser
                     
                     if user.type == "Authority":
                         auth = Authority.query.filter_by(usr_name = currentuser).first()
@@ -698,6 +716,7 @@ def usernameupdate():
                         db.session.add(auth)
                         db.session.add(oth)
                         db.session.commit()
+                        session["user"] = newuser
                     
                     
                     flash("Successfully Changed Username",'success')
@@ -714,7 +733,7 @@ def usernameupdate():
             return redirect(url_for('current'))
 
   else:
-      return render_template('index.html',scroll='relogin')      
+      return redirect(url_for('relogin'))      
         
     
 
@@ -747,6 +766,8 @@ def delete():
             db.session.delete(delete3)
             db.session.commit()
 
+            session.clear()
+
             flash("You have Successfully Deleted Your Account",'success')
             return redirect(url_for('index'))
         
@@ -756,7 +777,7 @@ def delete():
 
         return ""
   else:
-      return render_template('index.html',scroll='relogin')
+      return redirect(url_for('relogin'))
 
 
 
@@ -765,7 +786,7 @@ def download(filename):
     if "user" in session:
         return send_from_directory(directory='result', filename=filename)
     else:
-      return render_template('index.html',scroll='relogin')
+      return redirect(url_for('relogin'))
 
 
 
@@ -931,19 +952,20 @@ def train():
                             shape = sp(img_rgb, d)
                             face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
 
-                            last_found = {'name': 'unknown', 'dist': de, 'color': (0,0,255)}
+                            last_found = {'name': 'unknown', 'dist': de, 'color': (0,0,255), 'percent': 0}
 
                             for name, saved_desc in descs.items():
                                 dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
 
                                 if dist < last_found['dist']:
-                                    last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255)}
+                                    perce = (1-dist)*100
+                                    last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255), 'percent': perce}
                                     if m == -1:
                                         s = i
                                         m=0
                                     
                             cv2.rectangle(img_bgr, pt1=(d.left(), d.top()), pt2=(d.right(), d.bottom()), color=last_found['color'], thickness=2)
-                            cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
+                            cv2.putText(img_bgr, last_found['name'] + " (" + str(last_found['percent']) + "%)" , org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
                         i=i+1
                         writer.write(img_bgr)
                     
@@ -955,7 +977,7 @@ def train():
                     success = "You have successfully Processed the Video"
 
                     send = Other.query.filter_by(usr_name = session["user"]).first()
-                    send.no_of_video_upload = send.no_of_video_upload + 1
+                    send.no_of_video_upload = int(send.no_of_video_upload) + 1
                     db.session.add(send)
 
                     count = Count.query.filter_by(id = 1).first()
@@ -1055,7 +1077,7 @@ def train():
         print("Error")
         exit()
   else:
-      return render_template('index.html',scroll='relogin')
+      return redirect(url_for('relogin'))
 
 
 
@@ -1071,7 +1093,7 @@ def download5(filename):
 
         return send_from_directory(directory='result', filename=filename)
     else:
-      return render_template('index.html',scroll='relogin')
+      return redirect(url_for('relogin'))
 
 #end
 
@@ -1097,7 +1119,7 @@ def  thirddashboard():
         return render_template('third/thirdparty.html',all=all,value = value,user=session["third"])
     
   else:
-      return render_template('index.html',scroll='relogin')
+      return redirect(url_for('relogin'))
 
 
 
@@ -1141,7 +1163,7 @@ def  PendingUser():
                     return redirect(url_for('thirddashboard'))
 
     else:
-      return render_template('index.html',scroll='relogin')
+      return redirect(url_for('relogin'))
 
             
 
@@ -1282,11 +1304,10 @@ def  reatimevideo1():
         print("Error")
         exit()
   else:
-      return render_template('index.html',scroll='relogin')
+      return redirect(url_for('relogin'))
 
 
 #end
-
 
 
 #admin page
@@ -1295,10 +1316,12 @@ def  reatimevideo1():
 def  admindashboard():
     if "admin" in session:
         user = session["admin"]
-        return render_template('admin/dashboard.html',user=user)
+        admin = Admin.query.filter_by(usr_name = session["admin"]).first()
+        return render_template('admin/dashboard.html',user=user,admin=admin)
     else:
         
-        return render_template('index.html',scroll='relogin')
+        return redirect(url_for('relogin'))
+       
     
 
 
@@ -1308,20 +1331,10 @@ def user():
         user = session["admin"]
         ordinary = (db.session.query(Ordinary).filter(Ordinary.usr_name == Other.usr_name).join(Other,Other.admin_approval == 'no')).all()
         authority = (db.session.query(Authority).filter(Authority.usr_name == Other.usr_name).join(Other,Other.admin_approval == 'no')).all()
-        return render_template('admin/user.html',ordinary = ordinary,authority = authority,user=user)
+        admin = Admin.query.filter_by(usr_name = session["admin"]).first()
+        return render_template('admin/user.html',ordinary = ordinary,authority = authority,user=user,admin=admin)
     else:
-        return render_template('index.html',scroll='relogin')
-
-
-@app.route('/user')
-def user1():
-    if "admin" in session:
-        user = session["admin"]
-        ordinary = (db.session.query(Ordinary).filter(Ordinary.usr_name == Other.usr_name).join(Other,Other.admin_approval == 'no')).all()
-        authority = (db.session.query(Authority).filter(Authority.usr_name == Other.usr_name).join(Other,Other.admin_approval == 'no')).all()
-        return render_template('admin/user.html',ordinary = ordinary,authority = authority,user=user)
-    else:
-        render_template('index.html',scroll='relogin')
+        return redirect(url_for('relogin'))
 
 
 @app.route('/Admin/user/verify/<path:username>/<path:value>')
@@ -1348,10 +1361,9 @@ def verify(username,value):
             flash('Verified successfully')
             return redirect(url_for('user',user=user))
     else:
-        return render_template('index.html',scroll='relogin')
+        return redirect(url_for('relogin'))
 
-
-         
+     
          
 @app.route('/Admin/process')
 def  process():
@@ -1360,12 +1372,13 @@ def  process():
         succ = Other.query.filter_by(third_party_pending_order ='yes' ).all()
         fail = Other.query.filter_by(third_party_pending_order ='reject' ).all()
         processed = Other.query.filter_by(no_of_video_request = 2 ).all()
+        admin = Admin.query.filter_by(usr_name = session["admin"]).first()
         print(succ)
         print(fail)
         print(processed)
-        return render_template('admin/process.html',succ = succ ,fail = fail ,processed = processed ,user=user)
+        return render_template('admin/process.html',succ = succ ,fail = fail ,processed = processed ,user=user,admin=admin)
     else:
-        return render_template('index.html',scroll='relogin')
+        return redirect(url_for('relogin'))
 
 
 
@@ -1450,7 +1463,7 @@ def  processing(uname):
 
 
     else:
-        return render_template('index.html',scroll='relogin')
+        return redirect(url_for('relogin'))
   
 
 @app.route('/Admin/Processed/result/<path:filename>', methods=['GET', 'POST'])
@@ -1458,7 +1471,7 @@ def download4(filename):
     if "admin" in session:
         return send_from_directory(directory='result', filename=filename)
     else:
-      return render_template('index.html',scroll='relogin')
+      return redirect(url_for('relogin'))
 
 
 
@@ -1467,7 +1480,7 @@ def download3(filename):
     if "admin" in session:
         return send_from_directory(directory='third_video', filename=filename)
     else:
-      return render_template('index.html',scroll='relogin')
+      return redirect(url_for('relogin'))
 
 
 
@@ -1477,7 +1490,7 @@ def download2(filename):
         user = session["admin"]
         return send_from_directory(directory='ID_Proof', filename=filename,user=user)
     else:
-        return render_template('index.html',scroll='relogin')
+        return redirect(url_for('relogin'))
 
 
 
@@ -1486,6 +1499,7 @@ def third():
     if "admin" in session:
         user = session["admin"]
         all = db.session.query(Third.dept.distinct()).all()
+        admin = Admin.query.filter_by(usr_name = session["admin"]).first()
         len1 = len(all)
      
      
@@ -1495,6 +1509,7 @@ def third():
             name = request.form['thirdList']
             phone = request.form['phone']
             mail1 = request.form['fourthList']
+            
             if dept == 'Other':
                 dept = new
             exists = Third.query.filter_by(mail = mail1).first()
@@ -1524,21 +1539,51 @@ def third():
                 mail.send(msg)
 
 
-            
+                
                 flash('A new Third Party added successfully','success')
-                return render_template('admin/add_third.html',all = all, user=user)
+                return render_template('admin/add_third.html',all = all, user=user,admin=admin)
             else:
                 flash('Already Registered','error')
 
 
         if all != None:
-            return render_template('admin/add_third.html',all = all,user=user)
+            return render_template('admin/add_third.html',all = all,user=user,admin=admin)
         else:
-            return render_template('admin/add_third.html',user=user)
+            return render_template('admin/add_third.html',user=user,admin=admin)
     else:
-        return render_template('index.html',scroll='relogin')
+        return redirect(url_for('relogin'))
 
 
+
+
+@app.route('/Admin/editprofile', methods=["POST"])
+def editadmin():
+ if "admin" in session:
+
+    if request.method == "POST":
+        fname = request.form['fname']
+        lname = request.form['lname']
+        email = request.form['email']
+        phone = request.form['phone']
+        print(fname)
+        print(lname)
+        print(email)
+        print(phone)
+
+        admin = Admin.query.filter_by(usr_name = session["admin"]).first()
+        print(admin)
+        admin.fname = fname
+        admin.lname = lname
+        admin.mail = email
+        admin.phone = phone
+
+        db.session.add(admin)
+        db.session.commit()
+        flash("You have successfully updated your profile",'updatepro')
+    return redirect(url_for('admindashboard'))
+ else:
+
+    return redirect(url_for('relogin'))
 
 
 
@@ -1546,7 +1591,8 @@ def third():
 
 def register():
     if "admin" in session:
-        user = session["admin"]       
+        user = session["admin"]
+        admin = Admin.query.filter_by(usr_name = session["admin"]).first()       
         if request.method == "POST":
             uname = request.form['uname']
             email = request.form['mail']
@@ -1581,29 +1627,30 @@ def register():
 
                 
                 flash('A new admin added successfullly','success')
-                return render_template('admin/add_admin.html',user=user)
+                return render_template('admin/add_admin.html',user=user,admin=admin)
             else:
                 flash('Username already taken,try somethig else','error')
 
             
-        return render_template('admin/add_admin.html',user=user)
+        return render_template('admin/add_admin.html',user=user,admin=admin)
     else:
-        return render_template('index.html',scroll='relogin')
+        return redirect(url_for('relogin'))
 
 @app.route('/Admin/remove_user')
 def remove():
     if "admin" in session:
         user = session["admin"]
+        admin = Admin.query.filter_by(usr_name = session["admin"]).first()
 
-        admin = Admin.query.all()
+        admin1 = Admin.query.all()
         normal= Ordinary.query.all()
         third = Third.query.all()
         officials = Authority.query.all()
         
         
-        return render_template('admin/remove.html', admin=admin,normal=normal,third=third, officials=officials,user=user)
+        return render_template('admin/remove.html',admin=admin, admin1=admin1,normal=normal,third=third, officials=officials,user=user)
     else:
-        return render_template('index.html',scroll='relogin')
+        return redirect(url_for('relogin'))
 
 
 
@@ -1655,7 +1702,7 @@ def delete2(usr_name):
         flash("User Deleted Successfully",'success')
         return redirect(url_for('remove',user=user))
     else:
-        return render_template('index.html',scroll='relogin')
+        return redirect(url_for('relogin'))
 
 
 #end
@@ -1664,7 +1711,7 @@ def delete2(usr_name):
 @app.route("/logout")
 def logout():
     session.clear()
-    return render_template('index.html',scroll='relogin')
+    return redirect(url_for('relogin'))
 
 
 #end

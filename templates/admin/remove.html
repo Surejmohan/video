@@ -54,14 +54,14 @@
               </tr>
               
               
-              {% if admin == [] %}
+              {% if admin1 == [] %}
               <div class="alert alert-danger">
                 <strong>Info!</strong> There are no registered admin users 
               </div>
 
               {% endif %}
                  
-                        {% for user in admin %}
+                        {% for user in admin1 %}
                         
                       
                        
@@ -186,9 +186,8 @@
                       
               
 
-        </div>        </table></div>
+              </table></div>
 
-</div></div>
 <div id=operation2 style = "display:none;">
 
     <table class="table table-striped table-dark">
@@ -307,9 +306,8 @@
          
  
 
-</div>        </table></div>
+     </table></div>
 
-</div></div>
 
 <div id=operation3 style= "display:none;">
 
@@ -451,9 +449,9 @@
                       
               
 
-        </div>        </table></div>
+              </table></div>
 
-</div></div>
+
 <div id=operation4 style = "display:none;">
   <table class="table table-striped table-dark">
     <tr>
@@ -575,10 +573,10 @@
              
      
 
-</div>        </table></div>
+        </table></div>
 
 </div></div>   
-            
+           </div> 
 <script>
   function show(param_div_id) {
     document.getElementById('main_place').innerHTML = document.getElementById(param_div_id).innerHTML;

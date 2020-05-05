@@ -29,6 +29,20 @@ CSS Just for demo purpose, don't include it in your project
 <script>
   window.setTimeout("document.getElementById('message').style.display='none';",5000);
 </script>
+<script>
+
+function editprofile()
+{
+  document.getElementById("fname").readOnly = false;
+  document.getElementById("lname").readOnly = false;
+  document.getElementById("email").readOnly = false;
+  document.getElementById("phone").readOnly = false;
+
+  document.getElementById("message").style.display = "block";
+  window.setTimeout("document.getElementById('message').style.display='none';",5000);
+
+}
+</script>
 <body class="dark-edition">
   <body class="dark-edition">
     <div class="wrapper ">
@@ -96,11 +110,11 @@ CSS Just for demo purpose, don't include it in your project
               <span class="caret">Hi,&nbsp;{{user}} </span></a>
               
             <div class="dropdown-menu" >
-                <a class="dropdown-item" href="#editprofile" onclick="Updateprofile()">Edit Profile</a>
-                <a  class="dropdown-item"href="#updatediv" onclick="UpdatePassword()"> Change Password</a>
-                <a  class="dropdown-item"href="#updateusername" onclick="Updateusername()">Change Username</a>
-                <a href="/logout" class="dropdown-item" >Logout</a>
-                <a href="/delete" class="dropdown-item">Delete Account</a>
+              <a class="dropdown-item" data-toggle="modal" data-target="#modaledit">Edit Profile</a>
+              <a class="dropdown-item" data-toggle="modal" data-target="#passedit">Change Password</a>
+              <a class="dropdown-item" data-toggle="modal" data-target="#useredit">Change Username</a>
+              <a href="/logout" class="dropdown-item" >Logout</a>
+              <a class="dropdown-item" data-toggle="modal" data-target="#delete">Delete Account</a>
               <!--  <div class="dropdown-divider" ></div>
                 <a href="#"class="dropdown-item">Trash</a>
             </div>  -->
@@ -113,6 +127,198 @@ CSS Just for demo purpose, don't include it in your project
       <!-- End Navbar -->
 
 
-      {% block body %} {% endblock %}
+<div id="modaledit"class="modal fade"role="dialog">
+  <div id=co  style="color: black;">
+  <div class="modal-dialog">
+  <div class="modal-content">
+  <div class="modal-header">
+
+  <h4 class="modal-title"><b style="font-weight:700; text-align: center;">UPDATE ADMIN INFO</b></h4>
+  <br>
+
+  <button class="btn btn-secondary" onclick="editprofile();">edit</button>
+  </div>
+
+   <div class="modal-body" >
+    <label  id = "message"style="color:red;display:none"><b>Now you can edit your profile</b> </label>
+  <br>
+
+  <form  method="POST" action="/Admin/editprofile" id="modal-details">
+
+  <div class="form-group">
+  <label style= "color:#343a40"><b>Admin ID:</b></label>
+  <input type="text" readonly  id="adminid"  style= "color:#343a40" class="form-control" name="adminid" value="{{admin.admin_id}}" >
+  </div>
+
+  <div class="form-group">
+  <label  style= "color:#343a40"><b>First Name:</b></label>        
+    <input type="text" id="fname" readonly style= "color:#343a40" class="form-control" name="fname" value="{{admin.fname}}" >
+  </div>
+
+  <div class="form-group">
+  <label  style= "color:#343a40"><b>Last Name:</b></label>
+  <input type="text" id="lname" readonly  style= "color:#343a40" class="form-control" name="lname" value="{{admin.lname}}" >
+  </div>
+
+  <div class="form-group">
+  <label  style= "color:#343a40"><b>Email:</b></label>
+  <input type="text" id="email" readonly style= "color:#343a40" class="form-control" name="email" value="{{admin.mail}}">
+  </div>
+
+  <div class="form-group">
+  <label  style= "color:#343a40"><b>Phone:</b></label>
+  <input type="text" id="phone" readonly style= "color:#343a40" class="form-control" name="phone" value="{{admin.phone}}">
+  </div>
+
+  </div>
+
+  <div class="form-group" style="margin-left: 10px;">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal"><b>CLOSE</b></button>
+    <button type="submit" class="btn btn-primary submitBtn" form="modal-details"><b>UPDATE</b></button>
+  </div>
+
+  </form>
+  </div>
+  </div>
+ </div>
+ </div>
+                                     
+
+
+<div id="passedit"class="modal fade"role="dialog">
+  <div id=co  style="color: black;">
+  <div class="modal-dialog">
+  <div class="modal-content">
+  <div class="modal-header">
+
+  <h4 class="modal-title"><b style="font-weight:700; text-align: center;">UPDATE PASSWORD</b></h4>
+  <br>
+
+  
+  </div>
+
+   <div class="modal-body" >
+  <br>
+
+  <form  method="POST" action="/Admin/updatepassword" id="modal-details">
+
+  <div class="form-group">
+  <input type="password" id="oldpass" placeholder="Enter your Current Password"  style= "color:#343a40" class="form-control" name="oldpass" >
+  </div>
+
+  <div class="form-group">
+  <input type="password" id="newpass" placeholder="Enter New Password"  style= "color:#343a40" class="form-control" name="newpass" >
+  </div>
+
+  <div class="form-group">
+  <input type="password" id="confpass" placeholder="Re-enter new Password"  style= "color:#343a40" class="form-control" name="confpass" >
+  </div>
+
+  </div>
+
+  <div class="form-group" style="margin-left: 10px;">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal"><b>CLOSE</b></button>
+    <button type="submit" class="btn btn-primary submitBtn" form="modal-details"><b>UPDATE</b></button>
+  </div>
+  
+  </form>
+  </div>
+  </div>
+ </div>
+ </div>
+
+
+ <div id="useredit"class="modal fade"role="dialog">
+  <div id=co  style="color: black;">
+  <div class="modal-dialog">
+  <div class="modal-content">
+  <div class="modal-header">
+
+  <h4 class="modal-title"><b style="font-weight:700; text-align: center;">UPDATE USERNAME</b></h4>
+  <br>
+  </div>
+
+   <div class="modal-body" >
+  <br>
+
+  <form  method="POST" action="/Admin/editusername" id="modal-details">
+
+  <div class="form-group">
+  <input type="text" id="olduser"style= "color:#343a40" class="form-control" name="olduser" placeholder="Enter your Current Username" >
+  </div>
+
+  <div class="form-group">
+  <input type="text" id="newuser"style= "color:#343a40" class="form-control" name="newuser" placeholder="Enter New Username" >
+  </div>
+
+  <div class="form-group">
+  <input type="text" id="confuser"style= "color:#343a40" class="form-control" name="confuser" placeholder="Re-Enter new Username" >
+  </div>
+
+  </div>
+
+  <div class="form-group" style="margin-left: 10px;">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal"><b>CLOSE</b></button>
+    <button type="submit" class="btn btn-primary submitBtn" form="modal-details"><b>UPDATE</b></button>
+  </div>
+  
+  </form>
+  </div>
+  </div>
+ </div>
+ </div>
+
+
+
+
+ <div id="delete"class="modal fade"role="dialog">
+  <div id=co  style="color: black;">
+  <div class="modal-dialog">
+  <div class="modal-content">
+  <div class="modal-header">
+
+  <h4 class="modal-title"><b style="font-weight:700; text-align: center;">DELETE ACCOUNT</b></h4>
+  <br>
+  </div>
+
+   <div class="modal-body" >
+  <br>
+
+  <form  method="POST" action="/Admin/delete" id="modal-details">
+
+  <div class="alert alert-warning alert-dismissible fade show" style="max-width: 100%;border-radius: 5%;">
+  <strong>Are you Sure ?</strong> <br>
+  Once you confirm,all your account data will be permanently Deleted..
+  </div>
+
+  <br>
+  <div class="form-group">
+  <input type="text" id ="reason" name="reason" placeholder="Enter the reason" class="form-control" required/>
+  </div>
+
+  <div class="form-group">
+  <input type="password" id="password" placeholder="Enter the Password"  style= "color:#343a40" class="form-control" name="password" >
+  </div>
+
+  </div>
+
+  <div class="form-group" style="margin-left: 10px;">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal"><b>CLOSE</b></button>
+    <button type="submit" class="btn btn-primary submitBtn" form="modal-details"><b>UPDATE</b></button>
+  </div>
+  
+  </form>
+  </div>
+  </div>
+ </div>
+ </div>
+
+
+
+
+      {% block body %}
+      {% endblock %}
+
+
       {% include 'admin/footer.html' %}
   

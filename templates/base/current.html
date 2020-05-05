@@ -242,6 +242,9 @@ function EditOrdPro()
   document.getElementById("email").required = true;
   document.getElementById("zip").required = true;
   document.getElementById("address").required = true;
+  
+  document.getElementById("message").style.display = "block";
+  window.setTimeout("document.getElementById('message').style.display='none';",5000);
 
 
   $("#statediv").replaceWith(state)
@@ -287,6 +290,10 @@ var job =
   document.getElementById("Alname").required = true;
   document.getElementById("Amobile").required = true;
   document.getElementById("Aemail").required = true;
+
+  document.getElementById("message").style.display = "block";
+  window.setTimeout("document.getElementById('message').style.display='none';",5000);
+
 
   $("#jobdiv").replaceWith(job)
 
@@ -404,14 +411,22 @@ function hidepreview()
                
                 {% for category, message in messages %}
                 {% if category == 'success' %}
-                <div id="message" class="alert alert-success alert-dismissible fade show" style="max-width: 50%;">
+                <div id="message" class="alert alert-success alert-dismissible fade show" style="max-width: 600px;">
                   <strong>Success!</strong> {{ message }}
               </div>
               {% endif %}
 
+              {% if category == 'mass' %}
+              <center>
+              <div id="message" class="alert alert-info alert-dismissible fade show" style="max-width: 600px;">
+                <strong>Success!</strong> {{ message }}
+            </div>
+            </center>
+            {% endif %}
+
               {% if category == 'error' %}
 
-              <div  id="message" class="alert alert-danger alert-dismissible fade show" style="max-width: 50%;">
+              <div  id="message" class="alert alert-danger alert-dismissible fade show" style="max-width: 600px;">
                 <strong>Error!</strong> {{ message }}
             </div>
 
@@ -704,6 +719,8 @@ function hidepreview()
     <div align="center" id ="editprofile" class="container-fluid" style="display: none;margin-top: 100px; margin-bottom: 100px;padding: 2%; border-style: solid;
     border-color:#2dc997; border-radius: 7%; max-width: 1000px;">
     <h2 style="text-align: center;font-weight: bold;"id ="login">Edit Profile </h2>
+
+    <label  id = "message"style="color:red;display:none"><b>Now you can edit your profile</b> </label>
       <form action ="/user/update/profile" method ="POST">
         <div class="col-lg-12 ">
         <div class=" col-xs-12 col-sm-6 col-md-9">

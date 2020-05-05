@@ -57,23 +57,23 @@
         <div class="row counters">
 
   				<div class="col-lg-3 col-6 text-center">
-            <span data-toggle="counter-up">0</span>
-            <p>Clients</p>
+            <span data-toggle="counter-up">{{ value.Ordinary + value.Authority + value.Admin + value.Third_party }}</span>
+            <p>Users</p>
   				</div>
 
           <div class="col-lg-3 col-6 text-center">
-            <span data-toggle="counter-up">0</span>
-            <p>Projects</p>
+            <span data-toggle="counter-up">{{ value.Total_request }}</span>
+            <p>Total video Request</p>
   				</div>
 
           <div class="col-lg-3 col-6 text-center">
-            <span data-toggle="counter-up">0</span>
-            <p>Hours Of Support</p>
-  				</div>
-
+            <span data-toggle="counter-up">{{ value.Total_Real }}</span>
+            <p>Total Realtime Request</p>
+          </div>
+          
           <div class="col-lg-3 col-6 text-center">
-            <span data-toggle="counter-up">4</span>
-            <p>Hard Workers</p>
+            <span data-toggle="counter-up">{{ value.Total_upload }}</span>
+            <p>Total Upload </p>
   				</div>
 
   			</div>

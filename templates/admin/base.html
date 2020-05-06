@@ -38,6 +38,8 @@ function editprofile()
   document.getElementById("email").readOnly = false;
   document.getElementById("phone").readOnly = false;
 
+  document.getElementById("okbutton").disabled = false;
+
   document.getElementById("message").style.display = "block";
   window.setTimeout("document.getElementById('message').style.display='none';",5000);
 
@@ -139,12 +141,12 @@ function editprofile()
   <button class="btn btn-secondary" onclick="editprofile();">edit</button>
   </div>
 
-   <div class="modal-body" >
+   
     <label  id = "message"style="color:red;display:none"><b>Now you can edit your profile</b> </label>
   <br>
 
-  <form  method="POST" action="/Admin/editprofile" id="modal-details">
-
+  <form  method="POST" action="/Admin/editprofile" id="modal-details1">
+    <div class="modal-body" >
   <div class="form-group">
   <label style= "color:#343a40"><b>Admin ID:</b></label>
   <input type="text" readonly  id="adminid"  style= "color:#343a40" class="form-control" name="adminid" value="{{admin.admin_id}}" >
@@ -174,7 +176,7 @@ function editprofile()
 
   <div class="form-group" style="margin-left: 10px;">
     <button type="button" class="btn btn-secondary" data-dismiss="modal"><b>CLOSE</b></button>
-    <button type="submit" class="btn btn-primary submitBtn" form="modal-details"><b>UPDATE</b></button>
+    <button type="submit" name="uppro" disabled class="btn btn-primary submitBtn" id = "okbutton" form="modal-details1"><b>UPDATE</b></button>
   </div>
 
   </form>
@@ -193,14 +195,10 @@ function editprofile()
 
   <h4 class="modal-title"><b style="font-weight:700; text-align: center;">UPDATE PASSWORD</b></h4>
   <br>
-
-  
-  </div>
-
-   <div class="modal-body" >
+  </div> 
   <br>
-
-  <form  method="POST" action="/Admin/updatepassword" id="modal-details">
+  <form  method="POST" action="/Admin/updatepassword" id="modal-details2">
+    <div class="modal-body" >
 
   <div class="form-group">
   <input type="password" id="oldpass" placeholder="Enter your Current Password"  style= "color:#343a40" class="form-control" name="oldpass" >
@@ -218,7 +216,7 @@ function editprofile()
 
   <div class="form-group" style="margin-left: 10px;">
     <button type="button" class="btn btn-secondary" data-dismiss="modal"><b>CLOSE</b></button>
-    <button type="submit" class="btn btn-primary submitBtn" form="modal-details"><b>UPDATE</b></button>
+    <button type="submit" name="uppass" class="btn btn-primary submitBtn" id="pass" form="modal-details2"><b>UPDATE</b></button>
   </div>
   
   </form>
@@ -238,10 +236,10 @@ function editprofile()
   <br>
   </div>
 
-   <div class="modal-body" >
+   
   <br>
-
-  <form  method="POST" action="/Admin/editusername" id="modal-details">
+  <div class="modal-body" >
+  <form  method="POST" action="/Admin/editusername" id="modal-details3">
 
   <div class="form-group">
   <input type="text" id="olduser"style= "color:#343a40" class="form-control" name="olduser" placeholder="Enter your Current Username" >
@@ -259,7 +257,7 @@ function editprofile()
 
   <div class="form-group" style="margin-left: 10px;">
     <button type="button" class="btn btn-secondary" data-dismiss="modal"><b>CLOSE</b></button>
-    <button type="submit" class="btn btn-primary submitBtn" form="modal-details"><b>UPDATE</b></button>
+    <button type="submit" name="upuser" id="user" class="btn btn-primary submitBtn" form="modal-details3"><b>UPDATE</b></button>
   </div>
   
   </form>
@@ -281,11 +279,11 @@ function editprofile()
   <br>
   </div>
 
-   <div class="modal-body" >
+   
   <br>
 
-  <form  method="POST" action="/Admin/delete" id="modal-details">
-
+  <form  method="POST" action="/Admin/delete" id="modal-details4">
+    <div class="modal-body" >
   <div class="alert alert-warning alert-dismissible fade show" style="max-width: 100%;border-radius: 5%;">
   <strong>Are you Sure ?</strong> <br>
   Once you confirm,all your account data will be permanently Deleted..
@@ -293,7 +291,7 @@ function editprofile()
 
   <br>
   <div class="form-group">
-  <input type="text" id ="reason" name="reason" placeholder="Enter the reason" class="form-control" required/>
+  <input type="text" id ="reason" name="reason" placeholder="Enter the reason" style= "color:#343a40" class="form-control" required/>
   </div>
 
   <div class="form-group">
@@ -304,7 +302,7 @@ function editprofile()
 
   <div class="form-group" style="margin-left: 10px;">
     <button type="button" class="btn btn-secondary" data-dismiss="modal"><b>CLOSE</b></button>
-    <button type="submit" class="btn btn-primary submitBtn" form="modal-details"><b>UPDATE</b></button>
+    <button type="submit" name="delete" id="delete2" class="btn btn-primary submitBtn" form="modal-details4"><b>DELETE</b></button>
   </div>
   
   </form>

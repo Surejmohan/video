@@ -87,7 +87,7 @@ class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     fname = db.Column(db.String(50))
     lname = db.Column(db.String(50))
-    phone = db.Column(db.String(50))
+    phone = db.Column(db.Integer)
     mail = db.Column(db.String(50))
     admin_id = db.Column(db.String(20))
     usr_name = db.Column(db.String, db.ForeignKey('User.username'),nullable=False)
@@ -1034,19 +1034,20 @@ def train():
                     shape = sp(img_rgb, d)
                     face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
 
-                    last_found = {'name': 'unknown', 'dist': de, 'color': (0,0,255)}
+                    last_found = {'name': 'unknown', 'dist': de, 'color': (0,0,255),'percent': 0}
 
                     for name, saved_desc in descs.items():
                         dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
 
                         if dist < last_found['dist']:
-                            last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255)}
+                            perce = (1-dist)*100
+                            last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255), 'percent': perce}
                             if m == -1:
                                 s = i
                                 m=0
                                     
                     cv2.rectangle(img_bgr, pt1=(d.left(), d.top()), pt2=(d.right(), d.bottom()), color=last_found['color'], thickness=2)
-                    cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
+                    cv2.putText(img_bgr, last_found['name'] + " (" + str(last_found['percent']) + "%)" , org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
                 i=i+1
                 writer.write(img_bgr)
                 cv2.imshow('img', img_bgr)
@@ -1105,21 +1106,168 @@ def download5(filename):
 def  thirddashboard():
 
   if "third" in session:
-
+    
     all = Other.query.filter_by(third_party_issue_id = session["third"],third_party_pending_order = 'no').all()
     len1 = len(all)
+    third = Third.query.filter_by(usr_name = session["third"]).first()
     if (len1 == 0):
         value = 'None'
         flash("You do not have any Request",'None')
-        return render_template('third/thirdparty.html',all=all,value = value,user=session["third"])
+        return render_template('third/thirdparty.html',all=all,value = value,user=session["third"],third = third)
 
     else:
         value = 'success'
-        flash("You Have " + str(len1) + " Request",'success')
-        return render_template('third/thirdparty.html',all=all,value = value,user=session["third"])
+        flash("You Have " + str(len1) + " Request",'success5')
+        return render_template('third/thirdparty.html',all=all,value = value,user=session["third"],third=third)
     
   else:
       return redirect(url_for('relogin'))
+
+
+
+@app.route('/thirdparty/editprofile', methods=["POST"])
+def editthird():
+ if "third" in session:
+
+    if request.method == "POST":
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
+        print(name)
+        print(email)
+        print(phone)
+
+        third = Third.query.filter_by(usr_name = session["third"]).first()
+        print(third)
+        third.name = name
+        third.mail = email
+        third.phone = phone
+        
+        db.session.add(third)
+        db.session.commit()
+        flash("You have successfully updated your profile",'success')
+    return redirect(url_for('thirddashboard'))
+ else:
+
+    return redirect(url_for('relogin'))
+
+
+
+@app.route('/thirdparty/updatepassword', methods=["POST"])
+def updatethirdpass():
+    if "third" in session:
+
+        if request.method == 'POST':
+            currentpass = request.form['oldpass']
+            newpassword = request.form['newpass']
+            confpassword = request.form['confpass']
+
+            if newpassword == confpassword:
+                user = User.query.filter_by(username = session["third"],password = currentpass).first()
+                if user:
+                    if user.password == newpassword:
+                        flash("You have Entered same Password, Try some other",'error')
+                    else:
+                        user.password = newpassword
+                        db.session.add(user)
+                        db.session.commit()
+                        flash("Successfully Changed Password",'success')
+                else:
+                    flash("You Entered Wrong Password",'error')
+
+            else:
+                flash("New password is not matching",'error')
+        
+            return redirect(url_for('thirddashboard'))
+  
+    else:
+        return redirect(url_for('relogin'))
+
+
+
+@app.route('/thirdparty/editusername', methods=["POST"])
+def edituserthird():
+
+    if "third" in session:
+
+        if request.method == 'POST':
+            currentuser = request.form['olduser']
+            newuser = request.form['newuser']
+            confuser = request.form['confuser']
+
+            if newuser == confuser:
+                if currentuser == session["third"]:
+                    user = User.query.filter_by(username = currentuser).first()
+                    if user:
+                        if User.query.filter_by(username = newuser).first():
+                            flash("New Username Already exist, Try some other",'error')
+                            return redirect(url_for('thirddashboard'))
+                        else:
+                            if user.username == newuser:
+                                flash("You have Entered same Username, Try some other",'error')
+                                return redirect(url_for('thirddashboard'))
+                            else:
+                                if user.type == "Third_party":
+                                    th = Third.query.filter_by(usr_name = currentuser).first()
+                                    th.usr_name = newuser
+                                    user.username = newuser
+                                    db.session.add(user)
+                                    db.session.add(th)
+                                    db.session.commit()
+                                    session["third"] = newuser
+                    
+                                    flash("Successfully Changed Username",'success')
+                                    return redirect(url_for('thirddashboard'))
+                    else:
+                        flash("You Entered Wrong Username",'error')
+                        return redirect(url_for('thirddashboard'))
+                else:
+                    flash("You Entered Wrong Username",'error')
+                    return redirect(url_for('thirddashboard'))
+
+            else:
+                flash("New Username is not matching",'error')
+                return redirect(url_for('thirddashboard'))
+
+    else:
+        return redirect(url_for('relogin'))      
+
+
+
+@app.route('/thirdparty/delete', methods=['POST'])
+def deletethird():
+
+  if "third" in session:
+
+    if request.method == 'POST':
+        password = request.form['password']
+        user = User.query.filter_by(username = session["third"],password = password ).first()
+        if user:
+            delete1 = db.session.query(User).filter(User.username == session["third"]).first()
+
+            if user.type == "Third_party":
+                delete2 = Third.query.filter(Third.usr_name == session["third"]).first()
+                count = Count.query.filter(Count.id == 1).first()
+                count.Third_party = count.Third_party - 1
+        
+                db.session.add(count)
+                db.session.delete(delete1)
+                db.session.delete(delete2)
+                db.session.commit()
+
+                session.clear()
+
+                
+                return redirect(url_for('index'))
+        
+        else: 
+            flash("You have entered Wrong Password",'error')
+            return redirect(url_for('thirddashboard'))
+
+        return ""
+  else:
+      return redirect(url_for('relogin'))
+
 
 
 
@@ -1264,19 +1412,20 @@ def  reatimevideo1():
                 shape = sp(img_rgb, d)
                 face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
 
-                last_found = {'name': 'unknown', 'dist': de, 'color': (0,0,255)}
+                last_found = {'name': 'unknown', 'dist': de, 'color': (0,0,255),'percent': 0}
 
                 for name, saved_desc in descs.items():
                     dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
 
                     if dist < last_found['dist']:
-                        last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255)}
+                        perce = (1-dist)*100
+                        last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255), 'percent': perce}
                         if m == -1:
                             s = i
                             m=0
                                     
                 cv2.rectangle(img_bgr, pt1=(d.left(), d.top()), pt2=(d.right(), d.bottom()), color=last_found['color'], thickness=2)
-                cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
+                cv2.putText(img_bgr, last_found['name'] + " (" + str(last_found['percent']) + "%)" , org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
             i=i+1
             writer.write(img_bgr)
             cv2.imshow('img', img_bgr)
@@ -1418,19 +1567,20 @@ def  processing(uname):
                     shape = sp(img_rgb, d)
                     face_descriptor = facerec.compute_face_descriptor(img_rgb, shape)
 
-                    last_found = {'name': 'unknown', 'dist': de, 'color': (0,0,255)}
+                    last_found = {'name': 'unknown', 'dist': de, 'color': (0,0,255),'percent': 0}
 
                     for name, saved_desc in descs.items():
                         dist = np.linalg.norm([face_descriptor] - saved_desc, axis=1)
 
                         if dist < last_found['dist']:
-                            last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255)}
+                            perce = (1-dist)*100
+                            last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255), 'percent': perce}
                             if m == -1:
                                 s = i
                                 m=0
                                     
                     cv2.rectangle(img_bgr, pt1=(d.left(), d.top()), pt2=(d.right(), d.bottom()), color=last_found['color'], thickness=2)
-                    cv2.putText(img_bgr, last_found['name'], org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
+                    cv2.putText(img_bgr, last_found['name'] + " (" + str(last_found['percent']) + "%)" , org=(d.left(), d.top()), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=last_found['color'], thickness=2)
                 i=i+1
                 writer.write(img_bgr)
                     
@@ -1579,11 +1729,129 @@ def editadmin():
 
         db.session.add(admin)
         db.session.commit()
-        flash("You have successfully updated your profile",'updatepro')
+        flash("You have successfully updated your profile",'success')
     return redirect(url_for('admindashboard'))
  else:
 
     return redirect(url_for('relogin'))
+
+
+
+@app.route('/Admin/updatepassword', methods=["POST"])
+def updateadminpass():
+    if "admin" in session:
+
+        if request.method == 'POST':
+            currentpass = request.form['oldpass']
+            newpassword = request.form['newpass']
+            confpassword = request.form['confpass']
+
+            if newpassword == confpassword:
+                user = User.query.filter_by(username = session["admin"],password = currentpass).first()
+                if user:
+                    if user.password == newpassword:
+                        flash("You have Entered same Password, Try some other",'error')
+                    else:
+                        user.password = newpassword
+                        db.session.add(user)
+                        db.session.commit()
+                        flash("Successfully Changed Password",'success')
+                else:
+                    flash("You Entered Wrong Password",'error')
+
+            else:
+                flash("New password is not matching",'error')
+        
+            return redirect(url_for('admindashboard'))
+  
+    else:
+        return redirect(url_for('relogin'))
+
+
+
+@app.route('/Admin/editusername', methods=["POST"])
+def edituseradmin():
+
+    if "admin" in session:
+
+        if request.method == 'POST':
+            currentuser = request.form['olduser']
+            newuser = request.form['newuser']
+            confuser = request.form['confuser']
+
+            if newuser == confuser:
+                if currentuser == session["admin"]:
+                    user = User.query.filter_by(username = currentuser).first()
+                    if user:
+                        if User.query.filter_by(username = newuser).first():
+                            flash("New Username Already exist, Try some other",'error')
+                            return redirect(url_for('admindashboard'))
+                        else:
+                            if user.username == newuser:
+                                flash("You have Entered same Username, Try some other",'error')
+                                return redirect(url_for('admindashboard'))
+                            else:
+                                if user.type == "Admin":
+                                    ad = Admin.query.filter_by(usr_name = currentuser).first()
+                                    ad.usr_name = newuser
+                                    user.username = newuser
+                                    db.session.add(user)
+                                    db.session.add(ad)
+                                    db.session.commit()
+                                    session["admin"] = newuser
+                    
+                                    flash("Successfully Changed Username",'success')
+                                    return redirect(url_for('admindashboard'))
+                    else:
+                        flash("You Entered Wrong Username",'error')
+                        return redirect(url_for('admindashboard'))
+                else:
+                    flash("You Entered Wrong Username",'error')
+                    return redirect(url_for('admindashboard'))
+
+            else:
+                flash("New Username is not matching",'error')
+                return redirect(url_for('admindashboard'))
+
+    else:
+        return redirect(url_for('relogin'))      
+
+
+
+@app.route('/Admin/delete', methods=['POST'])
+def deleteadmin():
+
+  if "admin" in session:
+
+    if request.method == 'POST':
+        password = request.form['password']
+        user = User.query.filter_by(username = session["admin"],password = password ).first()
+        if user:
+            delete1 = db.session.query(User).filter(User.username == session["admin"]).first()
+
+            if user.type == "Admin":
+                delete2 = Admin.query.filter(Admin.usr_name == session["admin"]).first()
+                count = Count.query.filter(Count.id == 1).first()
+                count.Admin = count.Admin - 1
+        
+                db.session.add(count)
+                db.session.delete(delete1)
+                db.session.delete(delete2)
+                db.session.commit()
+
+                session.clear()
+
+                
+                return redirect(url_for('index'))
+        
+        else: 
+            flash("You have entered Wrong Password",'error')
+            return redirect(url_for('admindashboard'))
+
+        return ""
+  else:
+      return redirect(url_for('relogin'))
+
 
 
 

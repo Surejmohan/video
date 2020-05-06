@@ -9,79 +9,127 @@
                
            {% for category, message in messages %}
                 {% if category == 'success1' %}
-          <div id ="message" class="alert alert-success mb-3" style="max-width: 700px;" role="alert">
+          <div id ="message1" class="alert alert-success mb-3" style="max-width: 700px;" role="alert">
             {{message}} <br>
           </div>
+          <script>
+            window.setTimeout("document.getElementById('message1').style.display='none';",5000);
+          
+          </script>
         {% endif %}
+
+        {% if category == 'success' %}
+        <div id ="message2" class="alert alert-success mb-3" style="max-width: 700px;" role="alert">
+          {{message}} <br>
+        </div>
+        <script>
+          window.setTimeout("document.getElementById('message2').style.display='none';",5000);
+        
+        </script>
+      {% endif %}
+
+      
+
 
         {% if category == 'mass' %}
         <center>
-          <div id ="message" class="alert alert-info mb-3" style="max-width: 700px;" role="alert">
+          <div id ="message3" class="alert alert-info mb-3" style="max-width: 700px;" role="alert">
             {{message}} <br>
           </div>
+          <script>
+            window.setTimeout("document.getElementById('message3').style.display='none';",5000);
+          
+          </script>
           </center>
         {% endif %}
         
         {% if category =='errorvideo' %}
-        <div id ="message" class="alert alert-danger mb-3" style="max-width: 700px;" role="alert">
+        <div id ="message4" class="alert alert-danger mb-3" style="max-width: 700px;" role="alert">
           {{message}} <br>
         </div>
+        <script>
+          window.setTimeout("document.getElementById('message4').style.display='none';",5000);
+        
+        </script>
       {% endif %}
 
       {% if category =='errorimage' %}
-        <div id ="message" class="alert alert-danger mb-3" style="max-width: 700px;" role="alert">
+        <div id ="message5" class="alert alert-danger mb-3" style="max-width: 700px;" role="alert">
           {{message}} <br>
         </div>
+        <script>
+          window.setTimeout("document.getElementById('message5').style.display='none';",5000);
+        
+        </script>
       {% endif %}
 
 
       {% if category =='errornumber' %}
-        <div id ="message" class="alert alert-danger mb-3" style="max-width: 700px;" role="alert">
+        <div id ="message6" class="alert alert-danger mb-3" style="max-width: 700px;" role="alert">
           {{message}} <br>
         </div>
       {% endif %}
       
 
       {% if category =='errorface' %}
-        <div id ="message" class="alert alert-danger mb-3" style="max-width: 700px;" role="alert">
+        <div id ="message7" class="alert alert-danger mb-3" style="max-width: 700px;" role="alert">
           {{message}} <br>
         </div>
+        <script>
+          window.setTimeout("document.getElementById('message7').style.display='none';",5000);
+        
+        </script>
       {% endif %}
 
 
       {% if category =='errorcamera' %}
-        <div id ="message" class="alert alert-danger mb-3" style="max-width: 700px;" role="alert">
+        <div id ="message8" class="alert alert-danger mb-3" style="max-width: 700px;" role="alert">
           {{message}} <br>
         </div>
+        <script>
+          window.setTimeout("document.getElementById('message8').style.display='none';",5000);
+        
+        </script>
       {% endif %}
 
 
         {% if category =='success2' %}
-          <div id ="message" class="alert alert-success mb-3" style="max-width: 700px;" role="alert">
+          <div id ="message9" class="alert alert-success mb-3" style="max-width: 700px;" role="alert">
             {{message}} <br>
          </div>
+         <script>
+          window.setTimeout("document.getElementById('message9').style.display='none';",5000);
+        
+        </script>
         {% endif %}
         
 
         {% if category =='success3' %}
-        <div id ="message" class="alert alert-success mb-3" style="max-width: 700px;" role="alert">
+        <div id ="message10" class="alert alert-success mb-3" style="max-width: 700px;" role="alert">
           {{message}} <br>
        </div>
+       <script>
+        window.setTimeout("document.getElementById('message10').style.display='none';",5000);
+      
+      </script>
       {% endif %}
          
 
         
         {% if category =='error' %}
-          <div id ="message" class="alert alert-danger mb-3" style="max-width: 700px;" role="alert" >
+          <div id ="message11" class="alert alert-danger mb-3" style="max-width: 700px;" role="alert" >
             {{message}}
           </div>
+          <script>
+            window.setTimeout("document.getElementById('message11').style.display='none';",5000);
+          
+          </script>
         {% endif %}
       
       {% endfor %}
     {% endif %}
   {% endwith %}
 </div>
-
 
 <div class="content" id = "pending" style="display:none;">
   <div class="container-fluid">
@@ -100,7 +148,7 @@
                
            {% for category, message in messages %}
                 {% if category == 'None' %}
-        <div  class="alert alert-danger mb-3" role="alert" style="height: 50px;" >
+        <div  class="alert alert-danger mb-3" role="alert" id="message" style="height: 50px;" >
           {{message}}
         </div>
         {% endif %}
@@ -114,8 +162,8 @@
         {% if messages %}
                
            {% for category, message in messages %}
-                {% if category == 'success' %}
-    <div class="alert alert-success mb-3" role="alert" >
+                {% if category == 'success5' %}
+    <div class="alert alert-success mb-3" id="message" role="alert" >
      {{message}}
     </div>
     {% endif %}

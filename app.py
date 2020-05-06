@@ -171,13 +171,19 @@ class Other(db.Model):
     start_time = db.Column(db.String(20))
     end_time = db.Column(db.String(20))
     live_recording_no=db.Column(db.Integer)
+    result_time = db.Column(db.String(20))
+    result_query = db.Column(db.String(20))
+    result_percent = db.Column(db.Integer)
     usr_name = db.Column(db.String, db.ForeignKey('User.username'),nullable=False)
     
 
-    def __init__(self,admin_approval,admin_id,no_of_video_upload,no_of_video_request,third_party_issue_id,third_party_pending_order,third_party_response,date,start_time,end_time,live_recording_no,usr_name):
+    def __init__(self,admin_approval,admin_id,no_of_video_upload,no_of_video_request,third_party_issue_id,
+    third_party_pending_order,third_party_response,date,start_time,end_time,live_recording_no,result_time,
+    result_query,result_percent,usr_name):
         self.admin_approval=admin_approval
         self.admin_id=admin_id
-        self.no_of_video_request=no_of_video_upload
+        self.no_of_video_upload = no_of_video_upload
+        self.no_of_video_request=no_of_video_request
         self.third_party_issue_id=third_party_issue_id
         self.third_party_pending_order=third_party_pending_order
         self.third_party_response=third_party_response
@@ -186,6 +192,9 @@ class Other(db.Model):
         self.end_time=end_time
         self.live_recording_no=live_recording_no
         self.usr_name=usr_name
+        self.result_time = result_time
+        self.result_query = result_query
+        self.result_percent = result_percent
 
 
 #Third table
@@ -208,6 +217,7 @@ class Third(db.Model):
         self.third_party_id=third_party_id
 
 
+
 #Count table
 class Count(db.Model):
     __tablename__ = 'Count'
@@ -219,8 +229,10 @@ class Count(db.Model):
     Total_Real= db.Column(db.Integer)
     Total_upload = db.Column(db.Integer)
     Total_request = db.Column(db.Integer)
+    Total_crowd = db.Column(db.Integer)
+    Threshhold = db.Column(db.Integer)
 
-    def __init__(self,id,Ordinary,Authority,Admin,Third_party,Total_Real,Total_upload,Total_request):
+    def __init__(self,id,Ordinary,Authority,Admin,Third_party,Total_Real,Total_upload,Total_request,Total_crowd,Threshhold):
         self.id = id
         self.Ordinary = Ordinary
         self.Authority = Authority
@@ -229,6 +241,9 @@ class Count(db.Model):
         self.Total_Real = Total_Real
         self.Total_upload = Total_upload
         self.Total_request = Total_request
+        self.Total_crowd = Total_crowd
+        self.Threshhold = Threshhold
+
         
 #end
 
@@ -315,25 +330,29 @@ def allowed_file3(filename):
 
 @app.route('/')
 def index():
+
     value = Count.query.filter_by(id = 1).first()
     #return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
     return render_template('index.html',value = value)
 
 @app.route('/error')
 def error():
+
     value = Count.query.filter_by(id = 1).first()
-    
-    #return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
-    
     return render_template('index.html',scroll='re',value = value)
 
 
 @app.route('/relogin')
 def relogin():
+
     value = Count.query.filter_by(id = 1).first()
-    #return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
     return render_template('index.html',scroll='relogin',value = value)
     
+
+@app.route('/user/mail/activation')
+def mailactivation():
+    
+    return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
 
 
 
@@ -365,7 +384,8 @@ def Register():
 
                 other = Other(admin_approval = 'no', admin_id = '', no_of_video_upload = 0, no_of_video_request = 0, 
                 third_party_issue_id = '',third_party_pending_order = '',third_party_response = '', date = '', 
-                start_time = '', end_time = '', live_recording_no = 0,usr_name = username )
+                start_time = '', end_time = '', live_recording_no = 0,result_time = '',result_query = '',
+                result_percent = 0,usr_name = username )
                 db.session.add(other)
                 
                 value = Count.query.filter_by(id = 1).first()
@@ -386,7 +406,7 @@ def Register():
                     filename = secure_filename(file1.filename)
                     filename = username +'_' + filename 
                     file1.save(os.path.join(app.config['IDPROOF_FOLDER'], filename))
-                    return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
+                    return redirect(url_for('mailactivation'))
             else:
                 flash('Password and Confirm password not matched','error')
                 return redirect(url_for('error'))
@@ -441,7 +461,8 @@ def Register2():
 
                 other = Other(admin_approval = 'no', admin_id = '', no_of_video_upload = 0, no_of_video_request = 0, 
                 third_party_issue_id = '',third_party_pending_order = '',third_party_response = '', date = '', 
-                start_time = '', end_time = '', live_recording_no = 0, usr_name = username )
+                start_time = '', end_time = '', live_recording_no = 0,result_time = '',result_query = '',
+                result_percent = 0, usr_name = username )
                 db.session.add(other)
                 
                 value = Count.query.filter_by(id = 1).first()
@@ -460,7 +481,7 @@ def Register2():
                     filename = secure_filename(file1.filename)
                     filename = username +'_' + filename 
                     file1.save(os.path.join(app.config['IDPROOF_FOLDER'], filename))
-                    return '<html><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"><center><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><h1>Please Confirm Your Email Address</h1></div><div class="card-body"><br><p class="card-text">We have sent an email with a confirmation link to your email address. In order to complete the sign-up process, please click the confirmation link.<br><br>If you do not receive a confirmation email, please check your spam folder. Also, please verify that you entered a valid email address in our sign-up form.</p><br><br></div> </div><br><br><div class="card text-white bg-info" style="max-width: 80em;"><div class="card-header"><br><h4>Your Documents are sent to admin for Verification.After verification your account will be activated.<BR> Please wait for the account activation mail</h4></p><br><br></div></html>'
+                    return redirect(url_for('mailactivation'))
             else:
                 flash('Password and Confirm password not matched','error')
                 return redirect(url_for('error'))
@@ -490,6 +511,21 @@ def login():
                 return redirect(url_for('admindashboard'))
 
             elif login.type == 'Ordinary' or login.type == 'Authority':
+                oth = Other.query.filter_by(usr_name=uname).first()
+                if login.type == 'Ordinary':
+                    con = Ordinary.query.filter_by(usr_name=uname).first()
+                    if con.confirm == 0:
+                        return redirect(url_for('mailactivation'))
+                    if oth.admin_approval == "reject" or oth.admin_approval == "no":
+                        return 'not verified by admin'
+                
+                if login.type == 'Authority':
+                    con = Authority.query.filter_by(usr_name=uname).first()
+                    if con.confirm == 0:
+                        return redirect(url_for('mailactivation'))
+                    if oth.admin_approval == "reject" or oth.admin_approval == "no":
+                        return 'not verified by admin'
+
                 session["user"] = uname
                 flash(uname + ' Successfully Logged in','mass')
                 return redirect(url_for('current'))
@@ -938,6 +974,7 @@ def train():
                     m=-1
                     i=1
                     s=0
+                    c=1
                     while True:
                         
                         ret, img_bgr = cap.read()
@@ -960,6 +997,8 @@ def train():
                                 if dist < last_found['dist']:
                                     perce = (1-dist)*100
                                     last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255), 'percent': perce}
+                                    if dist< c:
+                                        c=dist
                                     if m == -1:
                                         s = i
                                         m=0
@@ -973,11 +1012,13 @@ def train():
                     cap.release()
                     writer.release()
                     time = convert(s/24)
+                    maxacc = (1-c)*100
+                    print(maxacc)
                     print(convert(s/24)) 
                     success = "You have successfully Processed the Video"
 
                     send = Other.query.filter_by(usr_name = session["user"]).first()
-                    send.no_of_video_upload = int(send.no_of_video_upload) + 1
+                    send.no_of_video_upload = send.no_of_video_upload + 1
                     db.session.add(send)
 
                     count = Count.query.filter_by(id = 1).first()
@@ -1020,6 +1061,7 @@ def train():
             m=-1
             i=1
             s=0
+            c=1
             while True:
                         
                 ret, img_bgr = cap.read()
@@ -1042,6 +1084,8 @@ def train():
                         if dist < last_found['dist']:
                             perce = (1-dist)*100
                             last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255), 'percent': perce}
+                            if dist< c:
+                                c=dist
                             if m == -1:
                                 s = i
                                 m=0
@@ -1057,6 +1101,8 @@ def train():
                 
             cap.release()
             writer.release()
+            maxacc = (1-c)*100
+            print(maxacc)
             time = convert(s/24)
             print(convert(s/24)) 
             success = "You have successfully Processed the Video"
@@ -1398,6 +1444,7 @@ def  reatimevideo1():
         m=-1
         i=1
         s=0
+        c=1
         while True:
                         
             ret, img_bgr = cap.read()
@@ -1420,6 +1467,8 @@ def  reatimevideo1():
                     if dist < last_found['dist']:
                         perce = (1-dist)*100
                         last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255), 'percent': perce}
+                        if dist< c:
+                            c=dist
                         if m == -1:
                             s = i
                             m=0
@@ -1435,6 +1484,8 @@ def  reatimevideo1():
                 
         cap.release()
         writer.release()
+        maxacc = (1-c)*100
+        print(maxacc)
         time = convert(s/24)
         print(convert(s/24)) 
 
@@ -1553,6 +1604,7 @@ def  processing(uname):
             m=-1
             i=1
             s=0
+            c=1
             while True:
                         
                 ret, img_bgr = cap.read()
@@ -1575,6 +1627,8 @@ def  processing(uname):
                         if dist < last_found['dist']:
                             perce = (1-dist)*100
                             last_found = {'name': "Target", 'dist': dist, 'color': (255,255,255), 'percent': perce}
+                            if dist< c:
+                                c=dist
                             if m == -1:
                                 s = i
                                 m=0
@@ -1587,6 +1641,8 @@ def  processing(uname):
                 
             cap.release()
             writer.release()
+            maxacc = (1-c)*100
+            print(maxacc)
             time = convert(s/24)
             print(convert(s/24)) 
             success = "You have successfully Processed the Video"
@@ -1984,14 +2040,13 @@ def logout():
 
 #end
 
-
 if(__name__ == "__main__"):
     app.run(debug=True)
 
 
 
 
-#insert into Count(id,Ordinary,Authority,Admin,Third_party,Total_Real,Total_upload,Total_request) values (1,0,0,0,0,0,0,0);
+#insert into Count(id,Ordinary,Authority,Admin,Third_party,Total_Real,Total_upload,Total_request,Total_crowd,Threshhold) values (1,0,0,0,0,0,0,0,0,0);
 
 
 

@@ -242,6 +242,8 @@ function EditOrdPro()
   document.getElementById("email").required = true;
   document.getElementById("zip").required = true;
   document.getElementById("address").required = true;
+
+  document.getElementById("save").disabled = false;
   
   document.getElementById("message").style.display = "block";
   window.setTimeout("document.getElementById('message').style.display='none';",5000);
@@ -290,6 +292,8 @@ var job =
   document.getElementById("Alname").required = true;
   document.getElementById("Amobile").required = true;
   document.getElementById("Aemail").required = true;
+
+  document.getElementById("save").disabled = false;
 
   document.getElementById("message").style.display = "block";
   window.setTimeout("document.getElementById('message').style.display='none';",5000);
@@ -379,7 +383,7 @@ function hidepreview()
       <nav id="nav-menu-container">
         <ul class="nav-menu pull-right">
           <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret">Hi,&nbsp;{{user}}</span></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="caret">Hi,&nbsp;{{user}} {% if notifi != None %} &nbsp;<b style="color: red;"> (1)</b> {% endif %}</span></a>
             <ul class="dropdown-menu">
               <li><a href="#editprofile" onclick="Updateprofile()">Edit Profile</a>
               </li>
@@ -827,7 +831,7 @@ function hidepreview()
                     {% else %} 
                     <a type="button" href="#editprofile" onclick="EditAuthoPro()" id ="edit" class="btn btn-primary"><b>EDIT</b></a>
                     {%endif%}
-                    <button type="submit" id ="save" style="color: white; background-color:#2dc997;max-width: 70px;" class="btn btn-primary"><b>SAVE</b></button>
+                    <button type="submit" id ="save" disabled style="color: white; background-color:#2dc997;max-width: 70px;" class="btn btn-primary"><b>SAVE</b></button>
                     <a type="button" href="/user/current" id ="back2"class="btn btn-danger"><b>BACK</b></a><br><br>
                     
                   </form>
